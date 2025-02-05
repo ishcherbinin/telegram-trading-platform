@@ -27,8 +27,7 @@ class RegularTrading(AbstractSession):
 
         events: list[Event] = []
 
-        entry = self._normalize_entry(entry)
-        order = Order.from_dict(entry)
+        order = self._build_order(entry)
         events.extend(self._check_for_trade(order))
         events.extend(self._add_new_order(order))
 
@@ -39,6 +38,11 @@ class RegularTrading(AbstractSession):
         entry["time_priority"] = self._orders_storage.get_order_time_priority
         _logger.debug(f"Normalized entry: {entry}")
         return entry
+
+    def _build_order(self, entry: dict[str, Any]) -> Order:
+        entry = self._normalize_entry(entry)
+        order = Order.from_dict(entry)
+        return order
 
     def _check_for_trade(self, order: Order) -> list[Event]:
         _logger.debug(f"Check for trade for order: {order}")
