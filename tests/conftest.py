@@ -4,10 +4,17 @@ from typing import Any
 import pytest
 
 from logging_conf import log_config
+from trading_exchange.event import Event
 from trading_exchange.orders_storage import OrdersStorage
+from trading_exchange.session_manager import SessionManager
 from trading_exchange.sessions.regular_trading import RegularTrading
 
 logging.config.dictConfig(log_config)
+
+class AuctionSession(RegularTrading):
+
+    def on_new_entry(self, entry: dict[str, Any]) -> list[Event]:
+        return []
 
 
 @pytest.fixture(scope="session")
@@ -42,6 +49,13 @@ def cancel_entry() -> dict[str, Any]:
         "username": "test_user",
     }
 
+@pytest.fixture
+def session_change_request() -> dict[str, Any]:
+    return {
+        "symbol": "BTC",
+        "session": "OPEN_AUCTION"
+    }
+
 @pytest.fixture(scope="function")
 def orders_storage() -> OrdersStorage:
     return OrdersStorage()
@@ -50,3 +64,10 @@ def orders_storage() -> OrdersStorage:
 @pytest.fixture(scope="function")
 def regular_trading(orders_storage: OrdersStorage) -> RegularTrading:
     return RegularTrading(orders_storage)
+
+@pytest.fixture(scope="function")
+def session_manager(regular_trading: RegularTrading,
+                     orders_storage: OrdersStorage) -> SessionManager:
+    return SessionManager(sessions={
+        "REGULAR": regular_trading,
+        "OPEN_AUCTION": AuctionSession(orders_storage)})
