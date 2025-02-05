@@ -40,6 +40,7 @@ class Order:
             symbol=data["symbol"],
             status=OrderStatusEnum.NEW,
             time_priority=data["time_priority"],
+            leaves_qty=Decimal(data["order_qty"]),
         )
 
     def to_dict(self) -> dict[str, Any]:

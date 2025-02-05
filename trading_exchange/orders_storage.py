@@ -34,5 +34,9 @@ class OrdersStorage:
         return next(filter(lambda order: order.id == order_id, self._orders), None)
 
     @property
+    def get_order_time_priority(self) -> int:
+        return len(self._orders)
+
+    @property
     def get_all_orders(self) -> list[Order]:
         return self._orders
