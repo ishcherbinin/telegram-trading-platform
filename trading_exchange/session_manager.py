@@ -82,10 +82,10 @@ class SessionManager:
         return session_logic.on_session_start(change_session_request)
 
     # noinspection PyMethodMayBeStatic
-    def _get_affected_symbols(self, change_session_request: dict[str, Any]) -> list[str]:
+    def _get_affected_symbols(self, change_session_request: dict[str, Any]) -> tuple[str, ...]:
         """
         Method to get affected symbols
         :param change_session_request:
         :return:
         """
-        return [change_session_request["symbol"]]
+        return change_session_request["symbol"],

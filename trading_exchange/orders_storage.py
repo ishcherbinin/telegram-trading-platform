@@ -33,6 +33,9 @@ class OrdersStorage:
     def get_order_by_id(self, order_id: str) -> Optional[Order]:
         return next(filter(lambda order: order.id == order_id, self._orders), None)
 
+    def get_orders_by_username(self, username: str) -> tuple[Order, ...]:
+        return tuple(order for order in self._orders if order.username == username)
+
     def clear_terminated_orders(self) -> None:
         self._orders = [order for order in self._orders if order.leaves_qty > 0]
 
