@@ -2,7 +2,10 @@ from typing import Any
 
 import pytest
 
-@pytest.fixture
+from trading_exchange.orders_storage import OrdersStorage
+
+
+@pytest.fixture(scope="session")
 def order_data() -> dict[str, Any]:
     return {
         "id": "123",
@@ -13,3 +16,7 @@ def order_data() -> dict[str, Any]:
         "symbol": "BTC",
         "time_priority": 0,
     }
+
+@pytest.fixture(scope="function")
+def orders_storage() -> OrdersStorage:
+    return OrdersStorage()
