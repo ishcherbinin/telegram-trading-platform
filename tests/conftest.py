@@ -34,6 +34,14 @@ def new_entry() -> dict[str, Any]:
         "action": "NEW"
     }
 
+@pytest.fixture
+def cancel_entry() -> dict[str, Any]:
+    return {
+        "id": "123",
+        "action": "CANCEL",
+        "username": "test_user",
+    }
+
 @pytest.fixture(scope="function")
 def orders_storage() -> OrdersStorage:
     return OrdersStorage()

@@ -82,3 +82,19 @@ def test_part_traded_flow(
 
     assert len(orders_storage.get_all_orders) == 1, "Orders were not removed from the storage"
 
+
+
+def test_cancel_flow(
+        regular_trading: RegularTrading,
+        orders_storage: OrdersStorage,
+        new_entry: dict[str, Any],
+        cancel_entry: dict[str, Any]):
+    regular_trading.on_new_entry(new_entry)
+
+    events = regular_trading.on_new_entry(cancel_entry)
+
+    cancel_events = tuple(event for event in events if event.event_type.value == "ORDER_CANCELED")
+
+    assert len(cancel_events) == 1, "Cancel event was not generated"
+
+    assert len(orders_storage.get_all_orders) == 0, "Orders were not removed from the storage"

@@ -16,6 +16,9 @@ class RegularTrading(AbstractSession):
         _logger.debug(f"New entry received: {entry}")
         if entry["action"] == "NEW":
             return self._on_new_order(entry)
+        if entry["action"] == "CANCEL":
+            return self._on_cancel_order(entry)
+        _logger.debug("Incorrect action for regular trading")
         return []
 
 
@@ -121,3 +124,9 @@ class RegularTrading(AbstractSession):
     # noinspection PyUnusedLocal
     def _calculate_trade_price(self, aggr_order: Order, passive_order: Order) -> Decimal:
         return passive_order.trade_price
+
+    def _on_cancel_order(self, entry: dict[str, Any]) -> list[Event]:
+        _logger.debug("Process cancel order entity")
+        order_id = entry["id"]
+        self._orders_storage.remove_order_by_id(order_id)
+        return [Event(EventTypeEnum.ORDER_CANCELED, order_id)]
