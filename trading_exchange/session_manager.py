@@ -51,6 +51,15 @@ class SessionManager:
 
         return events
 
+    def get_current_session_logic(self, symbol: str) -> AbstractSession:
+        """
+        Method to get current session logic for the symbol
+        :param symbol:
+        :return:
+        """
+        session_info = self.get_session_info(symbol)
+        return self._sessions[session_info.current_session]
+
     @staticmethod
     def _update_session_info(session_info: SessionInfo, new_session: str) -> None:
         session_info.previous_session = session_info.current_session
