@@ -1,11 +1,3 @@
-"""
-Module contains order instance with defined fields and action available for it.
-Order is an atomic entity of exchange, defines user request to buy or sell a certain amount of asset at a certain price.
-
-Since order is sent through telegram it also contains username from it
-
-"""
-
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any
@@ -15,6 +7,11 @@ from trading_exchange.enums import SideEnum, OrderStatusEnum
 
 @dataclass(repr=True)
 class Order:
+
+    """
+    Class represents order with defined fields and actions available for it.
+    """
+
     id: str
     username: str
     order_qty: Decimal
