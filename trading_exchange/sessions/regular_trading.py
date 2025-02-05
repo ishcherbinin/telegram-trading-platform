@@ -132,5 +132,9 @@ class RegularTrading(AbstractSession):
     def _on_cancel_order(self, entry: dict[str, Any]) -> list[Event]:
         _logger.debug("Process cancel order entity")
         order_id = entry["id"]
+        order = self._orders_storage.get_order_by_id(order_id)
+        if order is None:
+            _logger.debug(f"Order with id {order_id} not found")
+            return []
         self._orders_storage.remove_order_by_id(order_id)
-        return [Event(EventTypeEnum.ORDER_CANCELED, order_id)]
+        return [Event(EventTypeEnum.ORDER_CANCELED, order)]
