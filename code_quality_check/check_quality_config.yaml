@@ -1,0 +1,7 @@
+# Directories to exclude from the scan
+exclude_dirs:
+  - tests
+  - .venv
+
+# Ignore specific issues
+skips: []
