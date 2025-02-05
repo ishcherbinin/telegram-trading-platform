@@ -9,7 +9,6 @@ class SideEnum(Enum):
     BUY = "BUY"
     SELL = "SELL"
 
-
 class OrderStatusEnum(Enum):
 
     NEW = "NEW"
@@ -17,3 +16,9 @@ class OrderStatusEnum(Enum):
     FILLED = "FILLED"
     CANCELED = "CANCELED"
     REJECTED = "REJECTED"
+
+class EventTypeEnum(Enum):
+
+    ORDER_ADDED = "ORDER_ADDED"
+    ORDER_CANCELED = "ORDER_CANCELED"
+    ORDER_TRADED = "ORDER_TRADED"

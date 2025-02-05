@@ -1,8 +1,12 @@
+import logging.config
 from typing import Any
 
 import pytest
 
+from logging_conf import log_config
 from trading_exchange.orders_storage import OrdersStorage
+
+logging.config.dictConfig(log_config)
 
 
 @pytest.fixture(scope="session")
