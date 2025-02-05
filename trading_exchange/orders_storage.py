@@ -33,6 +33,9 @@ class OrdersStorage:
     def get_order_by_id(self, order_id: str) -> Optional[Order]:
         return next(filter(lambda order: order.id == order_id, self._orders), None)
 
+    def clear_terminated_orders(self) -> None:
+        self._orders = [order for order in self._orders if order.leaves_qty > 0]
+
     @property
     def get_order_time_priority(self) -> int:
         return len(self._orders)
@@ -40,3 +43,4 @@ class OrdersStorage:
     @property
     def get_all_orders(self) -> list[Order]:
         return self._orders
+

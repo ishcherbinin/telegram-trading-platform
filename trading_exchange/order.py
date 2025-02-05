@@ -48,3 +48,7 @@ class Order:
         dict_["side"] = self.side.value
         dict_["status"] = self.status.value
         return dict_
+
+    @property
+    def trade_price(self) -> Decimal:
+        return self.order_price

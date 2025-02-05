@@ -1,7 +1,8 @@
 import logging
+from decimal import Decimal
 from typing import Any
 
-from trading_exchange.enums import EventTypeEnum
+from trading_exchange.enums import EventTypeEnum, SideEnum, OrderStatusEnum
 from trading_exchange.event import Event
 from trading_exchange.order import Order
 from trading_exchange.sessions.abstract_session import AbstractSession
@@ -28,6 +29,7 @@ class RegularTrading(AbstractSession):
         events.extend(self._check_for_trade(order))
         events.extend(self._add_new_order(order))
 
+        self._orders_storage.clear_terminated_orders()
         return events
 
     def _normalize_entry(self, entry: dict[str, Any]) -> dict[str, Any]:
@@ -36,10 +38,86 @@ class RegularTrading(AbstractSession):
         return entry
 
     def _check_for_trade(self, order: Order) -> list[Event]:
-        return []
+        _logger.debug(f"Check for trade for order: {order}")
+        events: list[Event] = []
+        contra_orders = self._select_contra_orders(order)
+        self._sort_orders_for_trade(order, contra_orders)
+        tradable_orders = self._get_tradable_orders(order, contra_orders)
+        for passive_order in tradable_orders:
+            events.extend(self._trade_two_orders(order, passive_order))
+        return events
+
+    def _select_contra_orders(self, aggr_order: Order) -> list[Order]:
+        all_orders = self._orders_storage.get_all_orders
+        return [order for order in all_orders if self._is_contra_order(aggr_order, order)]
+
+    @staticmethod
+    def _is_contra_order(aggr_order: Order, order: Order) -> bool:
+        contra_side = SideEnum.SELL if aggr_order.side == SideEnum.BUY else SideEnum.BUY
+        return order.side == contra_side and order.symbol == aggr_order.symbol
 
     def _add_new_order(self, order: Order) -> list[Event]:
         if order.leaves_qty > 0:
             self._orders_storage.add_order(order)
             return [Event(EventTypeEnum.ORDER_ADDED, order)]
         return []
+
+    @staticmethod
+    def _sort_orders_for_trade(aggr_order: Order, contra_orders: list[Order]) -> None:
+        """
+        Standard sorting for regular trading. On most exchanges it is price time priority
+        :param aggr_order:
+        :param contra_orders:
+        :return:
+        """
+
+        _logger.debug(f"Sort orders for trade: {aggr_order} and {contra_orders}")
+
+        contra_orders.sort(key=lambda order: order.time_priority)
+
+        contra_orders.sort(key=lambda order: order.order_price)
+
+    @staticmethod
+    def _get_tradable_orders(aggr_order: Order, contra_orders: list[Order]) -> tuple[Order, ...]:
+        """
+        Method selects orders which are suitable for trade.
+        Implementation depends on the exchange rules. Default is price comparison
+
+        For buy order it will be orders with price less or equal to the price of aggr_order
+        For sale order it will be orders with price greater or equal to the price of aggr_order
+
+        :param aggr_order:
+        :param contra_orders:
+        :return:
+        """
+
+        if aggr_order.side == SideEnum.BUY:
+            return tuple(order for order in contra_orders if order.trade_price <= aggr_order.trade_price)
+        return tuple(order for order in contra_orders if order.trade_price >= aggr_order.trade_price)
+
+    @staticmethod
+    def _update_order(order: Order, trd_price: Decimal, trd_qty: Decimal) -> None:
+        order.last_price = trd_price
+        order.last_qty = trd_qty
+        order.leaves_qty -= trd_qty
+        order.cum_qty += trd_qty
+        if order.leaves_qty == 0:
+            order.status = OrderStatusEnum.FILLED
+        else:
+            order.status = OrderStatusEnum.PARTIALLY_FILLED
+
+    def _trade_two_orders(self, aggr_order: Order, passive_order: Order) -> list[Event]:
+        events = []
+        trd_price = self._calculate_trade_price(aggr_order, passive_order)
+        trd_qty = min(aggr_order.leaves_qty, passive_order.leaves_qty)
+        _logger.debug(f"Trade {trd_qty} of {aggr_order} and {passive_order} at price {trd_price}")
+        for order in (aggr_order, passive_order):
+            self._update_order(order, trd_price, trd_qty)
+            events.append(Event(EventTypeEnum.ORDER_TRADED, order))
+
+        return events
+
+    # noinspection PyMethodMayBeStatic
+    # noinspection PyUnusedLocal
+    def _calculate_trade_price(self, aggr_order: Order, passive_order: Order) -> Decimal:
+        return passive_order.trade_price
