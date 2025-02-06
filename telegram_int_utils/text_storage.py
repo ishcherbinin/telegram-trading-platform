@@ -33,3 +33,11 @@ class BaseTextStorage:
 
 
     CHAT_ID_MESSAGE = "Your chat id is"
+
+    NO_ACTIVE_ORDER_MESSAGE = "No active orders in the system"
+
+    TEXT_NO_PERMISSIONS_FOR_COMMAND = "You are not allowed to use this command"
+
+    REQUEST_FOR_SYMBOL_FOR_SESSION_CHECK = "Please provide symbol for session check"
+
+    TEXT_CURRENT_SESSION_ON_INSTRUMENT = "Current session is "

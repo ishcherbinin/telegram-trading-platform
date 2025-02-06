@@ -18,15 +18,17 @@ class ExchangeBuilder:
 
     def __init__(self):
         self.entry_processor = None
+        self.orders_storage = None
+        self.session_manager = None
 
     def build_exchange(self):
 
         _logger.debug("Building exchange")
 
-        storage = self._build_orders_storage()
-        sessions = self._build_sessions(storage)
-        session_manager = self._build_session_manager(sessions)
-        self.entry_processor = EntryProcessor(session_manager)
+        self.orders_storage = self._build_orders_storage()
+        sessions = self._build_sessions(self.orders_storage)
+        self.session_manager = self._build_session_manager(sessions)
+        self.entry_processor = EntryProcessor(self.session_manager)
 
     # noinspection PyMethodMayBeStatic
     def _build_session_manager(self, sessions: dict[str, AbstractSession]) -> SessionManager:

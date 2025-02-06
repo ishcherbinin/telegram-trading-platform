@@ -30,7 +30,8 @@ async def main() -> None:
     exchange_builder.build_exchange()
 
     msg_handler = MessageHandler(bot, dp, allowed_chat_ids,
-                        text_storage, exchange_builder.entry_processor)
+                                 text_storage,
+                                 exchange_builder)
     msg_handler.register_handlers()
 
     try:
