@@ -16,7 +16,8 @@ class ExchangeBuilder:
     Class builds trading exchange instance with defined fields and actions available for it.
     """
 
-    entry_processor: EntryProcessor
+    def __init__(self):
+        self.entry_processor = None
 
     def build_exchange(self):
 

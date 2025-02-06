@@ -40,9 +40,7 @@ class EntryProcessor:
             return events
 
         current_session_logic: AbstractSession = self._session_manager.get_current_session_logic(entry["symbol"])
-
         events = current_session_logic.on_new_entry(entry)
-
         return events
 
 
