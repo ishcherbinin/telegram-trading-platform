@@ -15,9 +15,6 @@ logging.config.dictConfig(log_config)
 
 _logger = logging.getLogger(__name__)
 
-
-
-
 async def main() -> None:
     _logger.info("Starting bot")
     allowed_chat_ids = [os.getenv("MANAGERS_CHAT"), *os.getenv("ALLOWED_IDS", [])]

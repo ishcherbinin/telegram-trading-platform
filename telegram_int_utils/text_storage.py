@@ -25,10 +25,10 @@ class TextStorage(AbstractTextStorage):
     {COMMON_GREETING}
     
     /help - show help message with available commands
-    /my-orders - show all your orders based on user name
-    /cancel-order - cancel order by order id
-    /new-order - create new order (specify symbol, side, price, quantity)
-    /current-session - show current trading session for instrument
+    /myorders - show all your orders based on user name
+    /cancelorder - cancel order by order id
+    /neworder - create new order (specify symbol, side, price, quantity)
+    /currentsession - show current trading session for instrument
     /exit - exit from current state
     """
 
@@ -36,9 +36,9 @@ class TextStorage(AbstractTextStorage):
     {COMMON_GREETING}
     
     /help - show help message with available commands
-    /show-all-orders - show all orders in the system
-    /cancel-order - cancel order by order id
-    /current-session - show current trading session for instrument
+    /showallorders - show all orders in the system
+    /cancelorder - cancel order by order id
+    /currentsession - show current trading session for instrument
     /exit - exit from current state
     """
 

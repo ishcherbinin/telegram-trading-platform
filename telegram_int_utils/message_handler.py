@@ -1,4 +1,5 @@
 from aiogram import Bot, Dispatcher, types
+from aiogram.filters import Command
 
 from telegram_int_utils.text_storage import AbstractTextStorage
 from telegram_int_utils.utils import validate_chat_id
@@ -30,12 +31,11 @@ class MessageHandler:
         return f"{self.__class__.__name__}({self._bot}, {self._dispatcher}, {self._text_storage}, {self._entry_processor})"
 
     def register_handlers(self):
-        self._dispatcher.message.register(self.start_command, commands=["start", "help"], state="*")
+        self._dispatcher.message.register(self._start_command, Command("start", "help"))
 
-    async def start_command(self, message: types.Message):
-        await message.answer(self._text_storage.COMMON_GREETING)
+    async def _start_command(self, message: types.Message):
         id_ = str(message.chat.id)
         msg = (self._text_storage.HELP_CLIENT
-               if validate_chat_id(id_, self._allowed_ids)
+               if await validate_chat_id(id_, self._allowed_ids)
                else self._text_storage.HELP_MANAGERS)
         await message.answer(msg)
