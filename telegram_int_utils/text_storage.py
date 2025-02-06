@@ -27,7 +27,7 @@ class BaseTextStorage:
     /showallorders - show all orders in the system
     /cancelorder - cancel order by order id
     /currentsession - show current trading session for instrument
-    /getid - get chat id by user name
+    /getid - get chat id
     /exit - exit from current state
     """
 

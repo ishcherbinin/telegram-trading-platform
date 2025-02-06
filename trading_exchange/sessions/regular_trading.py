@@ -61,7 +61,8 @@ class RegularTrading(AbstractSession):
     @staticmethod
     def _is_contra_order(aggr_order: Order, order: Order) -> bool:
         contra_side = SideEnum.SELL if aggr_order.side == SideEnum.BUY else SideEnum.BUY
-        return order.side == contra_side and order.symbol == aggr_order.symbol
+        return (order.side == contra_side and order.symbol == aggr_order.symbol
+                and order.username != aggr_order.username)
 
     def _add_new_order(self, order: Order) -> list[Event]:
         if order.leaves_qty > 0:

@@ -11,6 +11,7 @@ def contra_entry(new_entry: dict[str, Any]) -> dict[str, Any]:
     contra_entry = new_entry.copy()
     contra_entry["side"] = "SELL"
     contra_entry["id"] = "124"
+    contra_entry["username"] = "contra_user"
     return contra_entry
 
 
