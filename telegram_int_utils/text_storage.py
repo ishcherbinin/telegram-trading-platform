@@ -1,17 +1,5 @@
-class AbstractTextStorage:
 
-
-    """
-    Class which defines enums required to store text messages for telegram bot
-    """
-
-    COMMON_GREETING = ""
-    HELP_CLIENT = ""
-    HELP_MANAGERS = ""
-
-
-
-class TextStorage(AbstractTextStorage):
+class BaseTextStorage:
 
     """
     Class contains enums for text messages in tg bot,
@@ -39,6 +27,9 @@ class TextStorage(AbstractTextStorage):
     /showallorders - show all orders in the system
     /cancelorder - cancel order by order id
     /currentsession - show current trading session for instrument
+    /getid - get chat id by user name
     /exit - exit from current state
     """
 
+
+    CHAT_ID_MESSAGE = "Your chat id is"

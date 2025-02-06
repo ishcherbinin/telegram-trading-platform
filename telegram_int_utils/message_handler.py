@@ -1,7 +1,7 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 
-from telegram_int_utils.text_storage import AbstractTextStorage
+from telegram_int_utils.text_storage import BaseTextStorage
 from telegram_int_utils.utils import validate_chat_id
 from trading_exchange.entry_processor import EntryProcessor
 
@@ -18,7 +18,7 @@ class MessageHandler:
                  bot: Bot,
                  dispatcher: Dispatcher,
                  allowed_ids: list[str],
-                 text_storage: AbstractTextStorage,
+                 text_storage: BaseTextStorage,
                  entry_processor: EntryProcessor):
         self._bot = bot
         self._dispatcher = dispatcher
@@ -32,6 +32,7 @@ class MessageHandler:
 
     def register_handlers(self):
         self._dispatcher.message.register(self._start_command, Command("start", "help"))
+        self._dispatcher.message.register(self._get_id_command, Command("getid"))
 
     async def _start_command(self, message: types.Message):
         id_ = str(message.chat.id)
@@ -39,3 +40,8 @@ class MessageHandler:
                if await validate_chat_id(id_, self._allowed_ids)
                else self._text_storage.HELP_MANAGERS)
         await message.answer(msg)
+
+    async def _get_id_command(self, message: types.Message):
+        id_ = str(message.chat.id)
+        await message.answer(f"{self._text_storage.CHAT_ID_MESSAGE} {id_}")
+

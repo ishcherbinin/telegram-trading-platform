@@ -8,7 +8,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 from logging_conf import log_config
 from telegram_int_utils.message_handler import MessageHandler
-from telegram_int_utils.text_storage import TextStorage
+from telegram_int_utils.text_storage import BaseTextStorage
 from trading_exchange.exchange_builder import ExchangeBuilder
 
 logging.config.dictConfig(log_config)
@@ -25,7 +25,7 @@ async def main() -> None:
     bot = Bot(token=api_token)
     mem_storage = MemoryStorage()
     dp = Dispatcher(storage=mem_storage)
-    text_storage = TextStorage()
+    text_storage = BaseTextStorage()
     exchange_builder = ExchangeBuilder()
     exchange_builder.build_exchange()
 
