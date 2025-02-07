@@ -146,7 +146,6 @@ class MessageHandler:
         data = await state.get_data()
         await message.answer(self._text_storage.FILL_ORDER_DETAILS_REQUEST_MESSAGE,
                              reply_markup=self._get_order_keyboard(data))
-        await state.clear()
 
     async def _process_quantity(self, message: types.Message, state: FSMContext):
         """Save quantity and update order form."""
@@ -154,7 +153,6 @@ class MessageHandler:
         data = await state.get_data()
         await message.answer(self._text_storage.FILL_ORDER_DETAILS_REQUEST_MESSAGE,
                              reply_markup=self._get_order_keyboard(data))
-        await state.clear()
 
     def _get_order_keyboard(self, data: dict[str, Any]) -> InlineKeyboardMarkup:
         """Create an inline keyboard for quick selection."""
