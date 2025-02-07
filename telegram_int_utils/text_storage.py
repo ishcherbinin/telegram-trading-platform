@@ -34,6 +34,8 @@ class BaseTextStorage:
 
     CHAT_ID_MESSAGE = "Your chat id is"
 
+    TEXT_EXIT_MESSAGE = "You have exited from current state"
+
     NO_ACTIVE_ORDER_MESSAGE = "No active orders in the system"
 
     TEXT_NO_PERMISSIONS_FOR_COMMAND = "You are not allowed to use this command"
@@ -41,3 +43,12 @@ class BaseTextStorage:
     REQUEST_FOR_SYMBOL_FOR_SESSION_CHECK = "Please provide symbol for session check"
 
     TEXT_CURRENT_SESSION_ON_INSTRUMENT = "Current session is "
+
+    REQUEST_FOR_ORDER_DETAILS_MESSAGE = "Please provide symbol, side, price, quantity"
+
+    FILL_ORDER_DETAILS_REQUEST_MESSAGE = "🛒 **Fill in your order details:**"
+
+    REQUEST_FOR_ORDER_PRICE_MESSAGE = "💰 Enter price:"
+
+    REQUEST_FOR_ORDER_QUANTITY_MESSAGE = "📦 Enter quantity:"
+
