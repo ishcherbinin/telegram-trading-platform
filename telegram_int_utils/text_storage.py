@@ -50,6 +50,8 @@ class BaseTextStorage:
 
     FILL_ORDER_DETAILS_REQUEST_MESSAGE = "🛒 **Fill in your order details:**"
 
+    FILL_SESSION_CHANGE_DETAILS_REQUEST_MESSAGE = "🛒 **Fill in your request details:**"
+
     REQUEST_FOR_ORDER_PRICE_MESSAGE = "💰 Enter price:"
 
     REQUEST_FOR_ORDER_QUANTITY_MESSAGE = "📦 Enter quantity:"
@@ -64,4 +66,8 @@ class BaseTextStorage:
 
     ORDER_NOT_FOUND = "❌ Order not found."
 
+    REQUEST_FOR_SYMBOL_FOR_SESSION_CHANGE = "🔄 Enter symbol for session change:"
+
     HALT_SESSION_ORDER_REJECTION = "❌ Order rejected. Trading session is halted."
+
+    SUCCESSFUL_SESSION_CHANGE = "✅ Session changed successfully."

@@ -89,3 +89,11 @@ class SessionManager:
         :return:
         """
         return change_session_request["symbol"],
+
+    @property
+    def get_session_names(self) -> tuple[str, ...]:
+        """
+        Method to get session names
+        :return:
+        """
+        return tuple(self._sessions.keys())

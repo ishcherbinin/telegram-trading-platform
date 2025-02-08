@@ -55,6 +55,13 @@ class MessageHandler:
         self._dispatcher.message.register(self._exit_command, Command("exit"))
         self._dispatcher.message.register(self._get_current_session_command, Command("currentsession"))
         self._dispatcher.message.register(self._get_current_session, RequestStates.wait_for_symbol_for_session_state)
+
+        self._dispatcher.message.register(self._change_session_command, Command("changesession"))
+        self._dispatcher.callback_query.register(self._process_session_change_session_selection,
+                                                 F.data.in_(["select_session", "select_symbol_for_session"]))
+        self._dispatcher.callback_query.register(self._process_session_or_symbol, F.data.startswith("select_"))
+        self._dispatcher.callback_query.register(self._confirm_session_change, F.data == "confirm_change")
+
         self._dispatcher.message.register(self._cancel_order_command, Command("cancelorder"))
         self._dispatcher.message.register(self._process_cancel_order, RequestStates.wait_for_id_for_cancel_state)
 
@@ -110,6 +117,41 @@ class MessageHandler:
         session = self._session_manager.get_session_info(symbol).current_session
 
         await message.answer(f"{self._text_storage.TEXT_CURRENT_SESSION_ON_INSTRUMENT} {session}")
+        await state.clear()
+
+    async def _change_session_command(self, message: types.Message, state: FSMContext):
+        if await validate_chat_id(str(message.chat.id), self._allowed_ids):
+            await message.answer(self._text_storage.TEXT_NO_PERMISSIONS_FOR_COMMAND)
+            await state.clear()
+            return
+        await message.answer(self._text_storage.REQUEST_FOR_SYMBOL_FOR_SESSION_CHANGE,
+                             reply_markup=self._get_session_change_keyboard({}))
+
+    # noinspection PyUnusedLocal
+    async def _process_session_change_session_selection(self, callback: types.CallbackQuery, state: FSMContext):
+        if callback.data == "select_symbol_for_session":
+            await callback.message.edit_reply_markup(reply_markup=
+                                                     InlineKeyboardMarkup(inline_keyboard=self._symbol_buttons_for_session))
+        elif callback.data == "select_session":
+            await callback.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=self._session_buttons))
+
+
+    async def _process_session_or_symbol(self, callback: types.CallbackQuery, state: FSMContext):
+        """Save side or symbol and update order form."""
+        key, value = callback.data.split(":")
+        _logger.debug(f"Key: {key}, value: {value}")
+        await state.update_data({key.replace("select_", ""): value})
+        data = await state.get_data()
+        await callback.message.edit_text(self._text_storage.FILL_SESSION_CHANGE_DETAILS_REQUEST_MESSAGE,
+                                         reply_markup=self._get_session_change_keyboard(data))
+
+    async def _confirm_session_change(self, callback: types.CallbackQuery, state: FSMContext):
+        data = await state.get_data()
+        if None in data.values():
+            await callback.answer(self._text_storage.WARNING_FOR_EMPTY_FIELDS)
+            return
+        _ = self._entry_processor.process_entry({**data, "action": "CHANGE_SESSION"})
+        await callback.message.answer(self._text_storage.SUCCESSFUL_SESSION_CHANGE)
         await state.clear()
 
     async def _new_order_command(self, message: types.Message, state: FSMContext):
@@ -231,6 +273,17 @@ class MessageHandler:
             [InlineKeyboardButton(text="✅ Confirm Order", callback_data="confirm_order")]
         ])
 
+    # noinspection PyMethodMayBeStatic
+    def _get_session_change_keyboard(self, data: dict[str, Any]) -> InlineKeyboardMarkup:
+        """Create an inline keyboard for session change."""
+        symbol = data.get("symbol", "❔")
+        session = data.get("session", "❔")
+        return InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text=f"Symbol: {symbol}", callback_data="select_symbol_for_session")],
+            [InlineKeyboardButton(text=f"Session: {session}", callback_data="select_session")],
+            [InlineKeyboardButton(text="✅ Confirm change", callback_data="confirm_change")]
+        ])
+
     @property
     def _side_buttons(self) -> list[list[InlineKeyboardButton]]:
         return [
@@ -239,8 +292,27 @@ class MessageHandler:
         ]
 
     @property
+    def _available_symbols(self) -> list[str]:
+        return ["GEL/USD", "RUB/USD"]
+
+    @property
     def _symbol_buttons(self) -> list[list[InlineKeyboardButton]]:
         return [
-            [InlineKeyboardButton(text="GEL/USD", callback_data="set_symbol:GEL/USD"),
-             InlineKeyboardButton(text="RUB/USD", callback_data="set_symbol:RUB/USD")]
+            [InlineKeyboardButton(text=symbol, callback_data=f"set_symbol:{symbol}")
+             for symbol in self._available_symbols],
         ]
+
+    @property
+    def _symbol_buttons_for_session(self) -> list[list[InlineKeyboardButton]]:
+        return [
+            [InlineKeyboardButton(text=symbol, callback_data=f"select_symbol:{symbol}")
+             for symbol in self._available_symbols],
+        ]
+
+    @property
+    def _session_buttons(self) -> list[list[InlineKeyboardButton]]:
+        return [
+            [InlineKeyboardButton(text=session, callback_data=f"select_session:{session}")
+             for session in self._session_manager.get_session_names],
+        ]
+
