@@ -44,7 +44,7 @@ class BaseTextStorage:
 
     REQUEST_FOR_SYMBOL_FOR_SESSION_CHECK = "Please provide symbol for session check"
 
-    TEXT_CURRENT_SESSION_ON_INSTRUMENT = "Current session is "
+    TEXT_CURRENT_SESSION_ON_INSTRUMENT = "Current session is"
 
     REQUEST_FOR_ORDER_DETAILS_MESSAGE = "Please provide symbol, side, price, quantity"
 
