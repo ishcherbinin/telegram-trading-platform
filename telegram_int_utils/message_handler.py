@@ -55,6 +55,8 @@ class MessageHandler:
         self._dispatcher.message.register(self._exit_command, Command("exit"))
         self._dispatcher.message.register(self._get_current_session_command, Command("currentsession"))
         self._dispatcher.message.register(self._get_current_session, RequestStates.wait_for_symbol_for_session_state)
+        self._dispatcher.message.register(self._cancel_order_command, Command("cancelorder"))
+        self._dispatcher.message.register(self._process_cancel_order, RequestStates.wait_for_id_for_cancel_state)
 
         self._dispatcher.message.register(self._new_order_command, Command("neworder"))
         self._dispatcher.callback_query.register(self._process_selection,
@@ -173,15 +175,39 @@ class MessageHandler:
         _logger.debug(f"Assigned data: {assigned_data}")
         order_data = self._data_converter.convert(assigned_data)
         _logger.debug(f"Order data: {order_data}")
-        self._entry_processor.process_entry(order_data)
+        _ = self._entry_processor.process_entry(order_data)
         await callback.message.answer(self._text_storage.CONFIRMATION_OF_ORDER_CREATION_MESSAGE)
+        await state.clear()
+        self._chat_id_per_user[order_data["username"]] = callback.message.chat.id
+
+    async def _cancel_order_command(self, message: types.Message, state: FSMContext):
+        user_orders = self._orders_storage.get_orders_by_username(str(message.chat.username))
+        if len(user_orders) == 0:
+            await message.answer(self._text_storage.NO_ACTIVE_ORDER_MESSAGE)
+            await state.clear()
+            return
+        for order in user_orders:
+            await print_order(message, order)
+        await message.answer(self._text_storage.ASK_FOR_ID_FOR_CANCELLATION)
+        await state.set_state(RequestStates.wait_for_id_for_cancel_state)
+
+    async def _process_cancel_order(self, message: types.Message, state: FSMContext):
+        order_id = message.text
+        _logger.debug(f"Cancel order with id: {order_id}")
+        target_order = self._orders_storage.get_order_by_id(order_id)
+        if target_order is None:
+            await message.answer(self._text_storage.ORDER_NOT_FOUND)
+            await state.clear()
+            return
+        self._entry_processor.process_entry({"action": "CANCEL", "id": order_id, "symbol": target_order.symbol})
+        await message.answer(self._text_storage.CANCEL_ORDER_CONFIRMATION)
         await state.clear()
 
     def _assign_service_fields(self, message: types.Message, data: dict[str, Any]) -> dict[str, Any]:
         """Assign service fields to order data."""
         return {
             **data,
-            "id": f"O{self._orders_storage.get_next_order_id}",
+            "id": f"O{self._orders_storage.get_next_order_id}_{data['symbol']}",
             "username": message.chat.username,
         }
 
@@ -210,6 +236,6 @@ class MessageHandler:
     @property
     def _symbol_buttons(self) -> list[list[InlineKeyboardButton]]:
         return [
-            [InlineKeyboardButton(text="BTC/USD", callback_data="set_symbol:BTC/USD"),
-             InlineKeyboardButton(text="ETH/USD", callback_data="set_symbol:ETH/USD")]
+            [InlineKeyboardButton(text="GEL/USD", callback_data="set_symbol:GEL/USD"),
+             InlineKeyboardButton(text="RUB/USD", callback_data="set_symbol:RUB/USD")]
         ]

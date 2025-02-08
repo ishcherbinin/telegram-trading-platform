@@ -26,6 +26,7 @@ class BaseTextStorage:
     /help - show help message with available commands
     /showallorders - show all orders in the system
     /cancelorder - cancel order by order id
+    /neworder - create new order (specify symbol, side, price, quantity)
     /currentsession - show current trading session for instrument
     /getid - get chat id
     /exit - exit from current state
@@ -56,3 +57,8 @@ class BaseTextStorage:
 
     CONFIRMATION_OF_ORDER_CREATION_MESSAGE = "✅ Order created successfully."
 
+    ASK_FOR_ID_FOR_CANCELLATION = "🆔 Enter order ID to cancel:"
+
+    CANCEL_ORDER_CONFIRMATION = "✅ Order canceled successfully."
+
+    ORDER_NOT_FOUND = "❌ Order not found."
