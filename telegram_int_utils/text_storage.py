@@ -28,6 +28,7 @@ class BaseTextStorage:
     /cancelorder - cancel order by order id
     /neworder - create new order (specify symbol, side, price, quantity)
     /currentsession - show current trading session for instrument
+    /changesession - change session for instrument
     /getid - get chat id
     /exit - exit from current state
     """
@@ -62,3 +63,5 @@ class BaseTextStorage:
     CANCEL_ORDER_CONFIRMATION = "✅ Order canceled successfully."
 
     ORDER_NOT_FOUND = "❌ Order not found."
+
+    HALT_SESSION_ORDER_REJECTION = "❌ Order rejected. Trading session is halted."

@@ -171,6 +171,11 @@ class MessageHandler:
         if None in data.values():
             await callback.answer(self._text_storage.WARNING_FOR_EMPTY_FIELDS)
             return
+        current_session = self._session_manager.get_session_info(data["symbol"]).current_session
+        if current_session != "HALT":
+            await callback.answer(self._text_storage.HALT_SESSION_ORDER_REJECTION)
+            await state.clear()
+            return
         assigned_data = self._assign_service_fields(message=callback.message, data=data)
         _logger.debug(f"Assigned data: {assigned_data}")
         order_data = self._data_converter.convert(assigned_data)

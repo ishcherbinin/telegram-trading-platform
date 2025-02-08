@@ -5,6 +5,7 @@ from trading_exchange.entry_processor import EntryProcessor
 from trading_exchange.orders_storage import OrdersStorage
 from trading_exchange.session_manager import SessionManager
 from trading_exchange.sessions.abstract_session import AbstractSession
+from trading_exchange.sessions.halt import Halt
 from trading_exchange.sessions.regular_trading import RegularTrading
 
 _logger = logging.getLogger(__name__)
@@ -42,4 +43,5 @@ class ExchangeBuilder:
     def _build_sessions(self, order_storage: OrdersStorage) -> dict[str, AbstractSession]:
         return {
             "REGULAR": RegularTrading(order_storage),
+            "HALT": Halt(order_storage)
         }
