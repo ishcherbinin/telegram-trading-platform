@@ -6,6 +6,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
+from telegram_int_utils.data_converter import AbstractDataConverter
 from telegram_int_utils.fsm_states import RequestStates
 from telegram_int_utils.text_storage import BaseTextStorage
 from telegram_int_utils.utils import validate_chat_id, print_order
@@ -30,7 +31,8 @@ class MessageHandler:
                  dispatcher: Dispatcher,
                  allowed_ids: list[str],
                  text_storage: BaseTextStorage,
-                 exchange_builder: ExchangeBuilder):
+                 exchange_builder: ExchangeBuilder,
+                 data_converter: AbstractDataConverter):
         self._bot = bot
         self._dispatcher = dispatcher
         self._text_storage = text_storage
@@ -39,6 +41,7 @@ class MessageHandler:
         self._session_manager: SessionManager = exchange_builder.session_manager
         self._chat_id_per_user = {}
         self._allowed_ids = allowed_ids
+        self._data_converter = data_converter
 
     def __repr__(self):
         return (f"{self.__class__.__name__}({self._bot}, {self._dispatcher}, "
@@ -61,6 +64,7 @@ class MessageHandler:
         self._dispatcher.callback_query.register(self._enter_quantity, F.data == "enter_quantity")
         self._dispatcher.message.register(self._process_price, RequestStates.wait_for_order_price)
         self._dispatcher.message.register(self._process_quantity, RequestStates.wait_for_order_quantity)
+        self._dispatcher.callback_query.register(self._confirm_order, F.data == "confirm_order")
 
     async def _start_command(self, message: types.Message):
         id_ = str(message.chat.id)
@@ -107,7 +111,7 @@ class MessageHandler:
         await state.clear()
 
     async def _new_order_command(self, message: types.Message, state: FSMContext):
-        await state.update_data(side=None, symbol=None, price=None, quantity=None)
+        await state.update_data(side=None, symbol=None, price=None, quantity=None, action="NEW")
         await message.answer(self._text_storage.REQUEST_FOR_ORDER_DETAILS_MESSAGE,
                              reply_markup=self._get_order_keyboard({}))
 
@@ -115,16 +119,19 @@ class MessageHandler:
     async def _process_selection(self, callback: types.CallbackQuery, state: FSMContext):
         """Handle side & symbol selection."""
         if callback.data == "select_side":
+            _logger.debug("Select side")
             buttons = self._side_buttons
             await callback.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
 
         elif callback.data == "select_symbol":
+            _logger.debug("Select symbol")
             buttons = self._symbol_buttons
             await callback.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
 
     async def _process_side_or_symbol(self, callback: types.CallbackQuery, state: FSMContext):
         """Save side or symbol and update order form."""
         key, value = callback.data.split(":")
+        _logger.debug(f"Key: {key}, value: {value}")
         await state.update_data({key.replace("set_", ""): value})
         data = await state.get_data()
         await callback.message.edit_text(self._text_storage.FILL_ORDER_DETAILS_REQUEST_MESSAGE,
@@ -142,6 +149,7 @@ class MessageHandler:
 
     async def _process_price(self, message: types.Message, state: FSMContext):
         """Save price and update order form."""
+        _logger.debug(f"Price: {message.text}")
         await state.update_data(price=message.text)
         data = await state.get_data()
         await message.answer(self._text_storage.FILL_ORDER_DETAILS_REQUEST_MESSAGE,
@@ -149,10 +157,33 @@ class MessageHandler:
 
     async def _process_quantity(self, message: types.Message, state: FSMContext):
         """Save quantity and update order form."""
+        _logger.debug(f"Quantity: {message.text}")
         await state.update_data(quantity=message.text)
         data = await state.get_data()
         await message.answer(self._text_storage.FILL_ORDER_DETAILS_REQUEST_MESSAGE,
                              reply_markup=self._get_order_keyboard(data))
+
+    async def _confirm_order(self, callback: types.CallbackQuery, state: FSMContext):
+        """Create order and send it to exchange."""
+        data = await state.get_data()
+        if None in data.values():
+            await callback.answer(self._text_storage.WARNING_FOR_EMPTY_FIELDS)
+            return
+        assigned_data = self._assign_service_fields(message=callback.message, data=data)
+        _logger.debug(f"Assigned data: {assigned_data}")
+        order_data = self._data_converter.convert(assigned_data)
+        _logger.debug(f"Order data: {order_data}")
+        self._entry_processor.process_entry(order_data)
+        await callback.message.answer(self._text_storage.CONFIRMATION_OF_ORDER_CREATION_MESSAGE)
+        await state.clear()
+
+    def _assign_service_fields(self, message: types.Message, data: dict[str, Any]) -> dict[str, Any]:
+        """Assign service fields to order data."""
+        return {
+            **data,
+            "id": f"O{self._orders_storage.get_next_order_id}",
+            "username": message.chat.username,
+        }
 
     def _get_order_keyboard(self, data: dict[str, Any]) -> InlineKeyboardMarkup:
         """Create an inline keyboard for quick selection."""

@@ -10,7 +10,7 @@ async def print_order(message: types.Message, order: Order):
                          f"\nSymbol: {order.symbol}"
                          f"\nPrice: {order.order_price}"
                          f"\nQuantity: {order.order_qty},"
-                         f"\nSide: {order.side},"
+                         f"\nSide: {order.side.value},"
                          f"\nLeaves qty: {order.leaves_qty},")
 
 async def validate_chat_id(chat_id: str, allowed_chat_ids: list[str]) -> bool:

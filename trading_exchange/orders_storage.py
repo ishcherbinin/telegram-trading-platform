@@ -47,3 +47,6 @@ class OrdersStorage:
     def get_all_orders(self) -> list[Order]:
         return self._orders
 
+    @property
+    def get_next_order_id(self) -> int:
+        return len(self._orders) + 1

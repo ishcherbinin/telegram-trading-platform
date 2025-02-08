@@ -7,6 +7,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from logging_conf import log_config
+from telegram_int_utils.data_converter import TgDataConverter
 from telegram_int_utils.message_handler import MessageHandler
 from telegram_int_utils.text_storage import BaseTextStorage
 from trading_exchange.exchange_builder import ExchangeBuilder
@@ -29,9 +30,12 @@ async def main() -> None:
     exchange_builder = ExchangeBuilder()
     exchange_builder.build_exchange()
 
+    data_converter = TgDataConverter()
+
     msg_handler = MessageHandler(bot, dp, allowed_chat_ids,
                                  text_storage,
-                                 exchange_builder)
+                                 exchange_builder,
+                                 data_converter)
     msg_handler.register_handlers()
 
     try:

@@ -52,3 +52,7 @@ class BaseTextStorage:
 
     REQUEST_FOR_ORDER_QUANTITY_MESSAGE = "📦 Enter quantity:"
 
+    WARNING_FOR_EMPTY_FIELDS = "⚠️ Please complete all fields before confirming."
+
+    CONFIRMATION_OF_ORDER_CREATION_MESSAGE = "✅ Order created successfully."
+
