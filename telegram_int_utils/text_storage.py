@@ -71,3 +71,5 @@ class BaseTextStorage:
     HALT_SESSION_ORDER_REJECTION = "❌ Order rejected. Trading session is halted."
 
     SUCCESSFUL_SESSION_CHANGE = "✅ Session changed successfully."
+
+    SESSION_CHANGE_NOTIFICATION = "🔄 Session changed for {symbol} to {session}."
