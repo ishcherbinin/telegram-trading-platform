@@ -3,6 +3,7 @@ from typing import Any
 
 from trading_exchange.event import Event
 from trading_exchange.orders_storage import OrdersStorage
+from trading_exchange.trade_storage import TradeStorage
 
 
 class AbstractSession(ABC):
@@ -10,20 +11,14 @@ class AbstractSession(ABC):
     Abstract class for session. Defines strategy for creating other sessions
     """
 
-    def __init__(self, orders_storage: OrdersStorage):
+    def __init__(self,
+                 orders_storage: OrdersStorage,
+                 trade_storage: TradeStorage):
         self._orders_storage = orders_storage
-        self._trade_counter = 0
+        self._trade_storage = trade_storage
 
     def __repr__(self):
         return f"Logic for {self.__class__.__name__}"
-
-    def get_trade_id_counter(self) -> int:
-        """
-        Method returns trade counter value
-        :return: trade counter
-        """
-        self._trade_counter += 1
-        return self._trade_counter
 
     # noinspection PyMethodMayBeStatic
     # noinspection PyUnusedLocal

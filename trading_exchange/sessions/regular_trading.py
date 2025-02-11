@@ -6,6 +6,7 @@ from trading_exchange.enums import EventTypeEnum, SideEnum, OrderStatusEnum
 from trading_exchange.event import Event
 from trading_exchange.order import Order
 from trading_exchange.sessions.abstract_session import AbstractSession
+from trading_exchange.trade import Trade
 
 _logger = logging.getLogger(__name__)
 
@@ -119,12 +120,43 @@ class RegularTrading(AbstractSession):
         trd_price = self._calculate_trade_price(aggr_order, passive_order)
         trd_qty = min(aggr_order.leaves_qty, passive_order.leaves_qty)
         _logger.debug(f"Trade {trd_qty} of {aggr_order} and {passive_order} at price {trd_price}")
-        trd_id = self.get_trade_id_counter()
         for order in (aggr_order, passive_order):
             self._update_order(order, trd_price, trd_qty)
-            events.append(Event(EventTypeEnum.ORDER_TRADED, {**order.to_dict(), "trade_id": trd_id}))
-
+        trade_entity =  self._build_trade_entity(
+            symbol=aggr_order.symbol,
+            trade_price=trd_price,
+            trade_qty=trd_qty,
+            passive_user=passive_order.username,
+            aggressive_user=aggr_order.username
+        )
+        events.append(Event(EventTypeEnum.ORDER_TRADED, trade_entity))
+        self._trade_storage.add_trade_to_storage(trade_entity)
         return events
+
+    def _build_trade_entity(self, symbol: str,
+                            trade_price: Decimal,
+                            trade_qty: Decimal,
+                            passive_user: str,
+                            aggressive_user: str) -> Trade:
+        """
+        Method builds trade entity
+        :param symbol:
+        :param trade_price:
+        :param trade_qty:
+        :param passive_user:
+        :param aggressive_user:
+        :return:
+        """
+
+        return Trade(
+            trade_id=self._trade_storage.get_trade_id_counter(),
+            symbol=symbol,
+            trade_price=trade_price,
+            trade_qty=trade_qty,
+            passive_username=passive_user,
+            aggressive_username=aggressive_user
+        )
+
 
     # noinspection PyMethodMayBeStatic
     # noinspection PyUnusedLocal

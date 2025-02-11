@@ -32,7 +32,8 @@ async def main() -> None:
 
     data_converter = TgDataConverter()
 
-    msg_handler = MessageHandler(bot, dp, allowed_chat_ids,
+    msg_handler = MessageHandler(bot, dp,
+                                 allowed_chat_ids,
                                  text_storage,
                                  exchange_builder,
                                  data_converter)

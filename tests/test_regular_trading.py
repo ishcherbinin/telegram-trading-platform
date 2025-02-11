@@ -5,6 +5,8 @@ import pytest
 from trading_exchange.event import Event
 from trading_exchange.orders_storage import OrdersStorage
 from trading_exchange.sessions.regular_trading import RegularTrading
+from trading_exchange.trade_storage import TradeStorage
+
 
 @pytest.fixture
 def contra_entry(new_entry: dict[str, Any]) -> dict[str, Any]:
@@ -39,6 +41,7 @@ def test_adding_new_order(
 def test_two_orders_fully_traded(
         regular_trading: RegularTrading,
         orders_storage: OrdersStorage,
+        trade_storage: TradeStorage,
         contra_entry: dict[str, Any],
         new_entry: dict[str, Any]):
 
@@ -50,15 +53,18 @@ def test_two_orders_fully_traded(
 
     trd_events = tuple(event for event in events if event.event_type.value == "ORDER_TRADED")
 
-    assert len(trd_events) == 2, "Trade events were not generated"
+    assert len(trd_events) == 1, "Trade events were not generated"
 
     assert len(new_events) == 0, "Event new incorrectly generated for any of orders"
 
     assert len(orders_storage.get_all_orders) == 0, "Orders were not removed from the storage"
 
+    assert len(trade_storage.get_all_trades) == 1, "Trade was not added to the storage"
+
 def test_part_traded_flow(
         regular_trading: RegularTrading,
         orders_storage: OrdersStorage,
+        trade_storage: TradeStorage,
         contra_entry: dict[str, Any],
         new_entry: dict[str, Any]):
     regular_trading.on_new_entry(new_entry)
@@ -71,7 +77,7 @@ def test_part_traded_flow(
 
     trd_events = tuple(event for event in events if event.event_type.value == "ORDER_TRADED")
 
-    assert len(trd_events) == 2, "Trade events were not generated"
+    assert len(trd_events) == 1, "Trade events were not generated"
 
     assert len(new_events) == 1, "Event new was not generated for contra order"
 
@@ -82,6 +88,8 @@ def test_part_traded_flow(
     assert contra_order.leaves_qty == 5, "Contra order was not updated"
 
     assert len(orders_storage.get_all_orders) == 1, "Orders were not removed from the storage"
+
+    assert len(trade_storage.get_all_trades) == 1, "Trade was not added to the storage"
 
 
 
@@ -99,3 +107,4 @@ def test_cancel_flow(
     assert len(cancel_events) == 1, "Cancel event was not generated"
 
     assert len(orders_storage.get_all_orders) == 0, "Orders were not removed from the storage"
+

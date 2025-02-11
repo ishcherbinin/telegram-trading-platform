@@ -9,6 +9,7 @@ from trading_exchange.event import Event
 from trading_exchange.orders_storage import OrdersStorage
 from trading_exchange.session_manager import SessionManager
 from trading_exchange.sessions.regular_trading import RegularTrading
+from trading_exchange.trade_storage import TradeStorage
 
 logging.config.dictConfig(log_config)
 
@@ -62,17 +63,22 @@ def session_change_request() -> dict[str, Any]:
 def orders_storage() -> OrdersStorage:
     return OrdersStorage()
 
+@pytest.fixture(scope="function")
+def trade_storage() -> TradeStorage:
+    return TradeStorage()
 
 @pytest.fixture(scope="function")
-def regular_trading(orders_storage: OrdersStorage) -> RegularTrading:
-    return RegularTrading(orders_storage)
+def regular_trading(orders_storage: OrdersStorage,
+                    trade_storage: TradeStorage) -> RegularTrading:
+    return RegularTrading(orders_storage, trade_storage)
 
 @pytest.fixture(scope="function")
 def session_manager(regular_trading: RegularTrading,
-                     orders_storage: OrdersStorage) -> SessionManager:
+                     orders_storage: OrdersStorage,
+                    trade_storage: TradeStorage) -> SessionManager:
     return SessionManager(sessions={
         "REGULAR": regular_trading,
-        "OPEN_AUCTION": AuctionSession(orders_storage)})
+        "OPEN_AUCTION": AuctionSession(orders_storage, trade_storage)})
 
 @pytest.fixture(scope="function")
 def entry_processor(session_manager: SessionManager) -> EntryProcessor:
