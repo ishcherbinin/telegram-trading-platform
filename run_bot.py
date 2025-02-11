@@ -7,9 +7,9 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from logging_conf import log_config
-from telegram_int_utils.data_converter import TgDataConverter
-from telegram_int_utils.message_handler import MessageHandler
-from telegram_int_utils.text_storage import BaseTextStorage
+from telegram_interface.data_converter import TgDataConverter
+from telegram_interface.message_handler import MessageHandler
+from telegram_interface.text_storage import BaseTextStorage
 from trading_exchange.exchange_builder import ExchangeBuilder
 
 logging.config.dictConfig(log_config)

@@ -6,10 +6,10 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from telegram_int_utils.data_converter import AbstractDataConverter
-from telegram_int_utils.fsm_states import RequestStates
-from telegram_int_utils.text_storage import BaseTextStorage
-from telegram_int_utils.utils import validate_chat_id, print_order
+from telegram_interface.data_converter import AbstractDataConverter
+from telegram_interface.fsm_states import RequestStates
+from telegram_interface.text_storage import BaseTextStorage
+from telegram_interface.utils import validate_chat_id, print_order
 from trading_exchange.entry_processor import EntryProcessor
 from trading_exchange.exchange_builder import ExchangeBuilder
 from trading_exchange.orders_storage import OrdersStorage
