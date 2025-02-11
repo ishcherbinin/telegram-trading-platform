@@ -6,6 +6,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
+from event_listeners.listeners_manager import ListenersManager
 from telegram_interface.data_converter import AbstractDataConverter
 from telegram_interface.fsm_states import RequestStates
 from telegram_interface.text_storage import BaseTextStorage
@@ -14,7 +15,6 @@ from trading_exchange.entry_processor import EntryProcessor
 from trading_exchange.exchange_builder import ExchangeBuilder
 from trading_exchange.orders_storage import OrdersStorage
 from trading_exchange.session_manager import SessionManager
-from trading_exchange.trade_storage import TradeStorage
 
 _logger = logging.getLogger(__name__)
 
@@ -33,7 +33,8 @@ class MessageHandler:
                  allowed_ids: list[str],
                  text_storage: BaseTextStorage,
                  exchange_builder: ExchangeBuilder,
-                 data_converter: AbstractDataConverter):
+                 data_converter: AbstractDataConverter,
+                 listeners_manager: ListenersManager):
         self._bot = bot
         self._dispatcher = dispatcher
         self._text_storage = text_storage
@@ -43,6 +44,7 @@ class MessageHandler:
         self._chat_id_per_user = {}
         self._allowed_ids = allowed_ids
         self._data_converter = data_converter
+        self._listeners_manager = listeners_manager
 
     def __repr__(self):
         return (f"{self.__class__.__name__}({self._bot}, {self._dispatcher}, "
@@ -260,10 +262,11 @@ class MessageHandler:
         _logger.debug(f"Assigned data: {assigned_data}")
         order_data = self._data_converter.convert(assigned_data)
         _logger.debug(f"Order data: {order_data}")
-        _ = self._entry_processor.process_entry(order_data)
+        events = self._entry_processor.process_entry(order_data)
         await callback.message.answer(self._text_storage.CONFIRMATION_OF_ORDER_CREATION_MESSAGE)
         await state.clear()
         self._chat_id_per_user[order_data["username"]] = callback.message.chat.id
+        await self._listeners_manager.process_events(events)
 
     async def _cancel_order_command(self, message: types.Message, state: FSMContext):
         user_orders = self._orders_storage.get_orders_by_username(str(message.chat.username))

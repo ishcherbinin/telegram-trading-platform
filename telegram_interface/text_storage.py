@@ -73,3 +73,10 @@ class BaseTextStorage:
     SUCCESSFUL_SESSION_CHANGE = "✅ Session changed successfully."
 
     SESSION_CHANGE_NOTIFICATION = "🔄 Session changed for {symbol} to {session}."
+
+    MANAGERS_NOTIFICATION_ABOUT_TRADE = ("📈 New trade happened: "
+                                         "\nID: {trade_id} "
+                                         "\nSymbol: {symbol} "
+                                         "\nPrice: {trade_price} "
+                                         "\nQuantity: {trade_qty} "
+                                         "\nbetween {passive_username} and {aggressive_username}")

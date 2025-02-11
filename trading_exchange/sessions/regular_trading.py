@@ -119,7 +119,7 @@ class RegularTrading(AbstractSession):
         events = []
         trd_price = self._calculate_trade_price(aggr_order, passive_order)
         trd_qty = min(aggr_order.leaves_qty, passive_order.leaves_qty)
-        _logger.debug(f"Trade {trd_qty} of {aggr_order} and {passive_order} at price {trd_price}")
+        _logger.debug(f"Trade qty {trd_qty} of {aggr_order} and {passive_order} at price {trd_price}")
         for order in (aggr_order, passive_order):
             self._update_order(order, trd_price, trd_qty)
         trade_entity =  self._build_trade_entity(

@@ -6,6 +6,8 @@ from aiogram import Bot, Dispatcher
 
 from aiogram.fsm.storage.memory import MemoryStorage
 
+from event_listeners.listeners_manager import ListenersManager
+from event_listeners.telegram_event_listener import TgEventListener
 from logging_conf import log_config
 from telegram_interface.data_converter import TgDataConverter
 from telegram_interface.message_handler import MessageHandler
@@ -32,11 +34,14 @@ async def main() -> None:
 
     data_converter = TgDataConverter()
 
+    listeners_manager = ListenersManager(listeners=[TgEventListener(bot, allowed_chat_ids, text_storage)])
+
     msg_handler = MessageHandler(bot, dp,
                                  allowed_chat_ids,
                                  text_storage,
                                  exchange_builder,
-                                 data_converter)
+                                 data_converter,
+                                 listeners_manager)
     msg_handler.register_handlers()
 
     try:

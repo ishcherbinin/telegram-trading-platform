@@ -1,8 +1,9 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Union
 
 from trading_exchange.enums import EventTypeEnum
 from trading_exchange.order import Order
+from trading_exchange.trade import Trade
 
 
 @dataclass(repr=True)
@@ -13,4 +14,4 @@ class Event:
     """
 
     event_type: EventTypeEnum
-    info: dict[str, Any] or Order
+    info: Union[dict[str, Any], Order, Trade]
