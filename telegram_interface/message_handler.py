@@ -14,6 +14,7 @@ from trading_exchange.entry_processor import EntryProcessor
 from trading_exchange.exchange_builder import ExchangeBuilder
 from trading_exchange.orders_storage import OrdersStorage
 from trading_exchange.session_manager import SessionManager
+from trading_exchange.trade_storage import TradeStorage
 
 _logger = logging.getLogger(__name__)
 
