@@ -9,6 +9,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from event_listeners.listeners_manager import ListenersManager
 from telegram_interface.data_converter import AbstractDataConverter
 from telegram_interface.fsm_states import RequestStates
+from telegram_interface.ids_storage import TgIdsStorage
 from telegram_interface.text_storage import BaseTextStorage
 from telegram_interface.utils import validate_chat_id, print_order
 from trading_exchange.entry_processor import EntryProcessor
@@ -30,7 +31,7 @@ class MessageHandler:
     def __init__(self,
                  bot: Bot,
                  dispatcher: Dispatcher,
-                 allowed_ids: list[str],
+                 ids_storage: TgIdsStorage,
                  text_storage: BaseTextStorage,
                  exchange_builder: ExchangeBuilder,
                  data_converter: AbstractDataConverter,
@@ -38,11 +39,11 @@ class MessageHandler:
         self._bot = bot
         self._dispatcher = dispatcher
         self._text_storage = text_storage
+        self._ids_storage = ids_storage
         self._entry_processor: EntryProcessor = exchange_builder.entry_processor
         self._orders_storage: OrdersStorage = exchange_builder.orders_storage
         self._session_manager: SessionManager = exchange_builder.session_manager
-        self._chat_id_per_user = {}
-        self._allowed_ids = allowed_ids
+        self._allowed_ids = self._ids_storage.get_managers_ids()
         self._data_converter = data_converter
         self._listeners_manager = listeners_manager
 
@@ -185,11 +186,11 @@ class MessageHandler:
     async def _notify_user_session_change(self, session_change_request: dict[str, Any]):
         session_name = session_change_request["session"]
         symbol =  session_change_request["symbol"]
-        for user in self._chat_id_per_user:
+        for user in self._ids_storage.get_all_users():
             user_orders = self._orders_storage.get_orders_by_username(user)
             symbol_orders = tuple(order for order in user_orders if order.symbol == symbol)
             if len(symbol_orders) > 0:
-                chat_id = self._chat_id_per_user[user]
+                chat_id = self._ids_storage.get_user_ids(user)
                 msg = self._text_storage.SESSION_CHANGE_NOTIFICATION.format(symbol=symbol, session=session_name)
                 await self._bot.send_message(chat_id, msg)
 
@@ -265,7 +266,7 @@ class MessageHandler:
         events = self._entry_processor.process_entry(order_data)
         await callback.message.answer(self._text_storage.CONFIRMATION_OF_ORDER_CREATION_MESSAGE)
         await state.clear()
-        self._chat_id_per_user[order_data["username"]] = callback.message.chat.id
+        self._ids_storage.add_user_ids(callback.message.chat.username, str(callback.message.chat.id))
         await self._listeners_manager.process_events(events)
 
     async def _cancel_order_command(self, message: types.Message, state: FSMContext):

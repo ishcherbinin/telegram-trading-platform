@@ -80,3 +80,5 @@ class BaseTextStorage:
                                          "\nPrice: {trade_price} "
                                          "\nQuantity: {trade_qty} "
                                          "\nbetween {passive_username} and {aggressive_username}")
+
+    USER_TRADE_NOTIFICATION = "Trade happened with your order at price {trade_price} and quantity {trade_qty}"

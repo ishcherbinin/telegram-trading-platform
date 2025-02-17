@@ -10,6 +10,7 @@ from event_listeners.listeners_manager import ListenersManager
 from event_listeners.telegram_event_listener import TgEventListener
 from logging_conf import log_config
 from telegram_interface.data_converter import TgDataConverter
+from telegram_interface.ids_storage import TgIdsStorage
 from telegram_interface.message_handler import MessageHandler
 from telegram_interface.text_storage import BaseTextStorage
 from trading_exchange.exchange_builder import ExchangeBuilder
@@ -32,12 +33,14 @@ async def main() -> None:
     exchange_builder = ExchangeBuilder()
     exchange_builder.build_exchange()
 
+    ids_storage = TgIdsStorage()
+    ids_storage.set_managers_ids(allowed_chat_ids)
     data_converter = TgDataConverter()
 
-    listeners_manager = ListenersManager(listeners=[TgEventListener(bot, allowed_chat_ids, text_storage)])
+    listeners_manager = ListenersManager(listeners=[TgEventListener(bot, ids_storage, text_storage)])
 
     msg_handler = MessageHandler(bot, dp,
-                                 allowed_chat_ids,
+                                 ids_storage,
                                  text_storage,
                                  exchange_builder,
                                  data_converter,
