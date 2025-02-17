@@ -31,8 +31,11 @@ To set up the project, you need to follow these steps:
 ```
 TELEGRAM_API_TOKEN is the token you got from @BotFather. 
 
-MANAGERS_CHAT is the chat ids of the chat where you want to receive notifications about the trades (it is managers who will be handling this process")
-Example: MESSAGES_CHAT=[-123456789]
+MANAGERS_CHAT is the common chat ids of the chat where you want to receive notifications about the trades (it is managers who will be handling this process")
+Example: MANAGERS_CHAT=-123456789
+
+ALLOWED_IDS is chat ids as list for users are allowed to manage the bot and receive notification personally
+Example: ALLOWED_IDS=[-123456789, -987654321]
 ```
 4. Install requirements and python if it is needed
 ```
