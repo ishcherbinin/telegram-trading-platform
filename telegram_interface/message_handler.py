@@ -337,7 +337,7 @@ class MessageHandler:
 
     @property
     def _available_symbols(self) -> list[str]:
-        return self._reference_data.available_symbols()
+        return self._reference_data.all_available_symbols
 
     @property
     def _symbol_buttons(self) -> list[list[InlineKeyboardButton]]:

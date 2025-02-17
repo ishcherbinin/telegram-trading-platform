@@ -35,7 +35,11 @@ MANAGERS_CHAT is the common chat ids of the chat where you want to receive notif
 Example: MANAGERS_CHAT=-123456789
 
 ALLOWED_IDS is chat ids as list for users are allowed to manage the bot and receive notification personally
-Example: ALLOWED_IDS=[-123456789, -987654321]
+Example: ALLOWED_IDS="['-123456789','-987654321']"
+
+AVAILABLE_SYMBOLS is the list of available symbols for trading
+Example: AVAILABLE_SYMBOLS="['RUB/USD','GEL/USD']"
+
 ```
 4. Install requirements and python if it is needed
 ```

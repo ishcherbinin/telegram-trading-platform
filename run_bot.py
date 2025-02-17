@@ -1,3 +1,4 @@
+import ast
 import asyncio
 import logging.config
 import os
@@ -21,10 +22,15 @@ _logger = logging.getLogger(__name__)
 
 async def main() -> None:
     _logger.info("Starting bot")
-    allowed_chat_ids = [os.getenv("MANAGERS_CHAT"), *os.getenv("ALLOWED_IDS", [])]
+    all_ids = ast.literal_eval(os.getenv("ALLOWED_IDS", "[]"))
+    allowed_chat_ids = [os.getenv("MANAGERS_CHAT"), *all_ids]
     _logger.debug(f"Allowed chat ids: {allowed_chat_ids}")
     api_token = os.getenv("TELEGRAM_API_TOKEN")
     _logger.debug(f"API token: {api_token}")
+
+    available_symbols = os.getenv("AVAILABLE_SYMBOLS", "['RUB/USD','GEL/USD']")
+
+    symbols = ast.literal_eval(available_symbols)
 
     bot = Bot(token=api_token)
     mem_storage = MemoryStorage()
@@ -32,6 +38,7 @@ async def main() -> None:
     text_storage = BaseTextStorage()
     exchange_builder = ExchangeBuilder()
     exchange_builder.build_exchange()
+    exchange_builder.reference_data.set_available_symbols(symbols)
 
     ids_storage = TgIdsStorage()
     ids_storage.set_managers_ids(allowed_chat_ids)

@@ -18,12 +18,13 @@ class ReferenceData:
     def __init__(self):
         self._instrument_data: dict[str, dict[str, Any]] = {}
         self._api_end_point = urlparse("https://open.er-api.com/v6/latest/")
+        self._available_symbols: list[str] = []
 
     def __repr__(self):
         return f"{self.__class__.__name__}"
 
     def load_data_api_currency(self):
-        for instrument in self.available_symbols():
+        for instrument in self._available_symbols:
             target_instrument, source_instrument = instrument.split("/")
             api_data = self._get_data_from_api(target_instrument)
             if not api_data:
@@ -52,5 +53,9 @@ class ReferenceData:
         return self._instrument_data.get(symbol, {}).get("reference_price", Decimal(0.0))
 
     # noinspection PyMethodMayBeStatic
-    def available_symbols(self) -> list[str]:
-        return ["RUB/USD", "GEL/USD"]
+    def set_available_symbols(self, symbols: list[str]):
+        self._available_symbols = symbols
+
+    @property
+    def all_available_symbols(self):
+        return self._available_symbols

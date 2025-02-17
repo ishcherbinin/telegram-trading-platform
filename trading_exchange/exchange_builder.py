@@ -40,6 +40,7 @@ class ExchangeBuilder:
     # noinspection PyMethodMayBeStatic
     def _build_reference_data(self):
         rd = ReferenceData()
+        rd.set_available_symbols(["RUB/USD", "GEL/USD"])
         rd.load_data_api_currency()
         return rd
 
