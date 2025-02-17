@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from trading_exchange.entry_processor import EntryProcessor
 from trading_exchange.orders_storage import OrdersStorage
+from trading_exchange.reference_data import ReferenceData
 from trading_exchange.session_manager import SessionManager
 from trading_exchange.sessions.abstract_session import AbstractSession
 from trading_exchange.sessions.halt import Halt
@@ -23,17 +24,24 @@ class ExchangeBuilder:
         self.orders_storage = None
         self.session_manager = None
         self.trade_storage = None
+        self.reference_data = None
 
     def build_exchange(self):
 
         _logger.debug("Building exchange")
-
+        self.reference_data = self._build_reference_data()
         self.orders_storage = self._build_orders_storage()
         self.trade_storage = self._build_trade_storage()
         sessions = self._build_sessions(self.orders_storage, self.trade_storage)
         self.session_manager = self._build_session_manager(sessions)
         self.entry_processor = EntryProcessor(self.session_manager)
 
+
+    # noinspection PyMethodMayBeStatic
+    def _build_reference_data(self):
+        rd = ReferenceData()
+        rd.load_data_api_currency()
+        return rd
 
     # noinspection PyMethodMayBeStatic
     def _build_session_manager(self, sessions: dict[str, AbstractSession]) -> SessionManager:

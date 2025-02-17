@@ -15,6 +15,7 @@ from telegram_interface.utils import validate_chat_id, print_order
 from trading_exchange.entry_processor import EntryProcessor
 from trading_exchange.exchange_builder import ExchangeBuilder
 from trading_exchange.orders_storage import OrdersStorage
+from trading_exchange.reference_data import ReferenceData
 from trading_exchange.session_manager import SessionManager
 
 _logger = logging.getLogger(__name__)
@@ -43,6 +44,7 @@ class MessageHandler:
         self._entry_processor: EntryProcessor = exchange_builder.entry_processor
         self._orders_storage: OrdersStorage = exchange_builder.orders_storage
         self._session_manager: SessionManager = exchange_builder.session_manager
+        self._reference_data: ReferenceData = exchange_builder.reference_data
         self._allowed_ids = self._ids_storage.get_managers_ids()
         self._data_converter = data_converter
         self._listeners_manager = listeners_manager
@@ -335,7 +337,7 @@ class MessageHandler:
 
     @property
     def _available_symbols(self) -> list[str]:
-        return ["GEL/USD", "RUB/USD"]
+        return self._reference_data.available_symbols()
 
     @property
     def _symbol_buttons(self) -> list[list[InlineKeyboardButton]]:

@@ -7,6 +7,7 @@ from logging_conf import log_config
 from trading_exchange.entry_processor import EntryProcessor
 from trading_exchange.event import Event
 from trading_exchange.orders_storage import OrdersStorage
+from trading_exchange.reference_data import ReferenceData
 from trading_exchange.session_manager import SessionManager
 from trading_exchange.sessions.regular_trading import RegularTrading
 from trading_exchange.trade_storage import TradeStorage
@@ -83,3 +84,7 @@ def session_manager(regular_trading: RegularTrading,
 @pytest.fixture(scope="function")
 def entry_processor(session_manager: SessionManager) -> EntryProcessor:
     return EntryProcessor(session_manager)
+
+@pytest.fixture(scope="function")
+def reference_data_class() -> ReferenceData:
+    return ReferenceData()

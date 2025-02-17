@@ -13,6 +13,10 @@ class TgIdsStorage:
         self._managers_ids: list[str] = []
         self._chat_per_user_ids: dict[str, str] = {}
 
+    def __repr__(self):
+        return (f"{self.__class__.__name__}(Managers chat ids: {self._managers_ids}, "
+                f"chat user ids: {self._chat_per_user_ids})")
+
     def set_managers_ids(self, ids: Union[list[str], str]) -> None:
         if isinstance(ids, str):
             self._managers_ids.append(ids)
