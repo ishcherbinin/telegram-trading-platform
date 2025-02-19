@@ -373,6 +373,6 @@ class MessageHandler:
     def _session_buttons(self) -> list[list[InlineKeyboardButton]]:
         return [
             [InlineKeyboardButton(text=session, callback_data=f"choose_session:{session}")
-             for session in self._session_manager.get_session_names],
+             ] for session in self._session_manager.get_session_names
         ]
 
