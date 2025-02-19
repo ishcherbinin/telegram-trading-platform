@@ -359,14 +359,14 @@ class MessageHandler:
     def _symbol_buttons(self) -> list[list[InlineKeyboardButton]]:
         return [
             [InlineKeyboardButton(text=symbol, callback_data=f"set_symbol:{symbol}")
-             for symbol in self._available_symbols],
+             ] for symbol in self._available_symbols
         ]
 
     @property
     def _symbol_buttons_for_session(self) -> list[list[InlineKeyboardButton]]:
         return [
             [InlineKeyboardButton(text=symbol, callback_data=f"choose_symbol:{symbol}")
-             for symbol in self._available_symbols],
+             ] for symbol in self._available_symbols
         ]
 
     @property
