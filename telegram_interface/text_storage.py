@@ -16,6 +16,7 @@ class BaseTextStorage:
     /myorders - show all your orders based on user name
     /cancelorder - cancel order by order id
     /neworder - create new order (specify symbol, side, price, quantity)
+    /getreferenceprice - get reference price for symbol
     /currentsession - show current trading session for instrument
     /exit - exit from current state
     """
@@ -28,6 +29,7 @@ class BaseTextStorage:
     /cancelorder - cancel order by order id
     /neworder - create new order (specify symbol, side, price, quantity)
     /currentsession - show current trading session for instrument
+    /getreferenceprice - get reference price for symbol
     /changesession - change session for instrument
     /getid - get chat id
     /exit - exit from current state
@@ -82,3 +84,7 @@ class BaseTextStorage:
                                          "\nbetween {passive_username} and {aggressive_username}")
 
     USER_TRADE_NOTIFICATION = "Trade happened with your order at price {trade_price} and quantity {trade_qty}"
+
+    REQUEST_FOR_SYMBOL_FOR_REFERENCE_PRICE = "🔍 Enter symbol for reference price. Available symbols: {symbols}"
+
+    REFERENCE_FOR_SYMBOL_REPLY = "Reference price for {symbol} is {price}"

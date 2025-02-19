@@ -60,6 +60,11 @@ class MessageHandler:
         self._register_session_change_handlers()
         self._register_cancel_order_handlers()
         self._register_new_order_handlers()
+        self._register_get_reference_price_handlers()
+
+    def _register_get_reference_price_handlers(self):
+        self._dispatcher.message.register(self._get_reference_price_command, Command("getreferenceprice"))
+        self._dispatcher.message.register(self._process_reference_price, RequestStates.wait_for_symbol_for_reference_price_state)
 
     def _register_cancel_order_handlers(self):
         self._dispatcher.message.register(self._cancel_order_command, Command("cancelorder"))
@@ -145,6 +150,17 @@ class MessageHandler:
         session = self._session_manager.get_session_info(symbol).current_session
 
         await message.answer(f"{self._text_storage.TEXT_CURRENT_SESSION_ON_INSTRUMENT} {session}")
+        await state.clear()
+
+    async def _get_reference_price_command(self, message: types.Message, state: FSMContext):
+        symbols = self._reference_data.all_available_symbols
+        await message.answer(self._text_storage.REQUEST_FOR_SYMBOL_FOR_REFERENCE_PRICE.format(symbols=symbols))
+        await state.set_state(RequestStates.wait_for_symbol_for_reference_price_state)
+
+    async def _process_reference_price(self, message: types.Message, state: FSMContext):
+        symbol = message.text
+        price = self._reference_data.get_reference_price(symbol)
+        await message.answer(self._text_storage.REFERENCE_FOR_SYMBOL_REPLY.format(symbol=symbol, price=price))
         await state.clear()
 
     async def _change_session_command(self, message: types.Message, state: FSMContext):
