@@ -13,3 +13,4 @@ class RequestStates(StatesGroup):
     wait_for_order_details = State()
     wait_for_symbol_for_session_state = State()
     wait_for_id_for_cancel_state = State()
+    wait_for_symbol_for_new_order = State()

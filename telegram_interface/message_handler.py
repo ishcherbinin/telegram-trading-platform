@@ -72,9 +72,11 @@ class MessageHandler:
 
     def _register_new_order_handlers(self):
         self._dispatcher.message.register(self._new_order_command, Command("neworder"))
-        self._dispatcher.callback_query.register(self._process_selection,
+        self._dispatcher.callback_query.register(self._process_selection_new_order,
                                                  F.data.in_(["select_side", "select_symbol"]))
         self._dispatcher.callback_query.register(self._process_side_or_symbol, F.data.startswith("set_"))
+        self._dispatcher.message.register(self._process_symbol_for_new_order,
+                                          RequestStates.wait_for_symbol_for_new_order)
         self._dispatcher.callback_query.register(self._enter_price, F.data == "enter_price")
         self._dispatcher.callback_query.register(self._enter_quantity, F.data == "enter_quantity")
         self._dispatcher.message.register(self._process_price, RequestStates.wait_for_order_price)
@@ -103,6 +105,8 @@ class MessageHandler:
                                                  F.data.in_(["choose_session", "choose_symbol_for_session"]))
         self._dispatcher.callback_query.register(self._process_session_or_symbol, F.data.startswith("choose_"))
         self._dispatcher.callback_query.register(self._confirm_session_change, F.data == "confirm_change")
+        self._dispatcher.message.register(self._process_symbol_for_session_change,
+                                          RequestStates.wait_for_symbol_for_session_change)
 
     def _register_session_request_handlers(self):
         self._dispatcher.message.register(self._get_current_session_command, Command("currentsession"))
@@ -153,7 +157,7 @@ class MessageHandler:
         await state.clear()
 
     async def _get_reference_price_command(self, message: types.Message, state: FSMContext):
-        symbols = self._reference_data.all_available_symbols
+        symbols = self._available_symbols
         await message.answer(self._text_storage.COMMON_REQUEST_FOR_SYMBOL_ENTITY.format(symbols=symbols))
         await state.set_state(RequestStates.wait_for_symbol_for_reference_price_state)
 
@@ -174,9 +178,12 @@ class MessageHandler:
     # noinspection PyUnusedLocal
     async def _process_session_change_session_selection(self, callback: types.CallbackQuery, state: FSMContext):
         if callback.data == "choose_symbol_for_session":
-            await callback.message.edit_reply_markup(reply_markup=
-                                                     InlineKeyboardMarkup(inline_keyboard=self._symbol_buttons_for_session))
+            _logger.debug("Select symbol for session change")
+            symbols = str(self._available_symbols).replace("[", "").replace("]", "")
+            await callback.message.answer(self._text_storage.COMMON_REQUEST_FOR_SYMBOL_ENTITY.format(symbols=symbols))
+            await state.set_state(RequestStates.wait_for_symbol_for_session_change)
         elif callback.data == "choose_session":
+            _logger.debug("Select session for session change")
             await callback.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=self._session_buttons))
 
 
@@ -188,6 +195,14 @@ class MessageHandler:
         data = await state.get_data()
         await callback.message.edit_text(self._text_storage.FILL_SESSION_CHANGE_DETAILS_REQUEST_MESSAGE,
                                          reply_markup=self._get_session_change_keyboard(data))
+
+    async def _process_symbol_for_session_change(self, message: types.Message, state: FSMContext):
+        """Save symbol and update order form."""
+        _logger.debug(f"Symbol: {message.text}")
+        await state.update_data(symbol=message.text)
+        data = await state.get_data()
+        await message.answer(self._text_storage.FILL_SESSION_CHANGE_DETAILS_REQUEST_MESSAGE,
+                             reply_markup=self._get_session_change_keyboard(data))
 
     async def _confirm_session_change(self, callback: types.CallbackQuery, state: FSMContext):
         data = await state.get_data()
@@ -218,17 +233,18 @@ class MessageHandler:
                              reply_markup=self._get_order_keyboard({}))
 
     # noinspection PyUnusedLocal
-    async def _process_selection(self, callback: types.CallbackQuery, state: FSMContext):
+    async def _process_selection_new_order(self, callback: types.CallbackQuery, state: FSMContext):
         """Handle side & symbol selection."""
         if callback.data == "select_side":
-            _logger.debug("Select side")
+            _logger.debug("Select side for new order")
             buttons = self._side_buttons
             await callback.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
 
         elif callback.data == "select_symbol":
-            _logger.debug("Select symbol")
-            buttons = self._symbol_buttons
-            await callback.message.edit_reply_markup(reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
+            _logger.debug("Select symbol for new order")
+            symbols = str(self._available_symbols).replace("[", "").replace("]", "")
+            await callback.message.answer(self._text_storage.COMMON_REQUEST_FOR_SYMBOL_ENTITY.format(symbols=symbols))
+            await state.set_state(RequestStates.wait_for_symbol_for_new_order)
 
     async def _process_side_or_symbol(self, callback: types.CallbackQuery, state: FSMContext):
         """Save side or symbol and update order form."""
@@ -253,6 +269,14 @@ class MessageHandler:
         """Save price and update order form."""
         _logger.debug(f"Price: {message.text}")
         await state.update_data(price=message.text)
+        data = await state.get_data()
+        await message.answer(self._text_storage.FILL_ORDER_DETAILS_REQUEST_MESSAGE,
+                             reply_markup=self._get_order_keyboard(data))
+
+    async def _process_symbol_for_new_order(self, message: types.Message, state: FSMContext):
+        """Save symbol and update order form."""
+        _logger.debug(f"Symbol: {message.text}")
+        await state.update_data(symbol=message.text)
         data = await state.get_data()
         await message.answer(self._text_storage.FILL_ORDER_DETAILS_REQUEST_MESSAGE,
                              reply_markup=self._get_order_keyboard(data))
@@ -306,7 +330,8 @@ class MessageHandler:
             await message.answer(self._text_storage.ORDER_NOT_FOUND)
             await state.clear()
             return
-        self._entry_processor.process_entry({"action": "CANCEL", "id": order_id, "symbol": target_order.symbol})
+        self._entry_processor.process_entry({"action": "CANCEL", "id": order_id,
+                                             "symbol": target_order.symbol})
         await message.answer(self._text_storage.CANCEL_ORDER_CONFIRMATION)
         await state.clear()
 
