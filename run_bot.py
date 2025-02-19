@@ -15,10 +15,23 @@ from telegram_interface.ids_storage import TgIdsStorage
 from telegram_interface.message_handler import MessageHandler
 from telegram_interface.text_storage import BaseTextStorage
 from trading_exchange.exchange_builder import ExchangeBuilder
+from trading_exchange.reference_data import ReferenceData
 
 logging.config.dictConfig(log_config)
 
 _logger = logging.getLogger(__name__)
+
+async def update_reference_prices(reference_data: ReferenceData, delay: int) -> None:
+    """
+    method update reference prices after each hour
+    :param delay:
+    :param reference_data:
+    :return:
+    """
+    while True:
+        reference_data.load_data_api_currency()
+        await asyncio.sleep(delay)
+
 
 async def main() -> None:
     _logger.info("Starting bot")
@@ -31,6 +44,8 @@ async def main() -> None:
     available_symbols = os.getenv("AVAILABLE_SYMBOLS", "['RUB/USD','GEL/USD']")
 
     symbols = ast.literal_eval(available_symbols)
+
+    fetch_price_delay = int(os.getenv("FETCH_PRICE_DELAY", 60))
 
     bot = Bot(token=api_token)
     mem_storage = MemoryStorage()
@@ -56,6 +71,7 @@ async def main() -> None:
 
     try:
         _logger.info("Starting polling")
+        asyncio.create_task(update_reference_prices(exchange_builder.reference_data, fetch_price_delay))
         await dp.start_polling(bot)
     except Exception as e:
         _logger.error(f"Error while polling: {e}")

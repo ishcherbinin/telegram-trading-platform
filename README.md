@@ -40,6 +40,8 @@ Example: ALLOWED_IDS="['-123456789','-987654321']"
 AVAILABLE_SYMBOLS is the list of available symbols for trading
 Example: AVAILABLE_SYMBOLS="['RUB/USD','GEL/USD']"
 
+REFPRICE_UPDATE_FREQUENCY=60 is the frequency of updating the reference price in seconds
+
 ```
 4. Install requirements and python if it is needed
 ```
