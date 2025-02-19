@@ -142,7 +142,7 @@ class MessageHandler:
 
     # noinspection PyMethodMayBeStatic
     async def _get_current_session_command(self, message: types.Message, state: FSMContext):
-        await message.answer(self._text_storage.REQUEST_FOR_SYMBOL_FOR_SESSION_CHECK)
+        await message.answer(self._text_storage.COMMON_REQUEST_FOR_SYMBOL_ENTITY)
         await state.set_state(RequestStates.wait_for_symbol_for_session_state)
 
     async def _get_current_session(self, message: types.Message, state: FSMContext):
@@ -154,7 +154,7 @@ class MessageHandler:
 
     async def _get_reference_price_command(self, message: types.Message, state: FSMContext):
         symbols = self._reference_data.all_available_symbols
-        await message.answer(self._text_storage.REQUEST_FOR_SYMBOL_FOR_REFERENCE_PRICE.format(symbols=symbols))
+        await message.answer(self._text_storage.COMMON_REQUEST_FOR_SYMBOL_ENTITY.format(symbols=symbols))
         await state.set_state(RequestStates.wait_for_symbol_for_reference_price_state)
 
     async def _process_reference_price(self, message: types.Message, state: FSMContext):
@@ -168,7 +168,7 @@ class MessageHandler:
             await message.answer(self._text_storage.TEXT_NO_PERMISSIONS_FOR_COMMAND)
             await state.clear()
             return
-        await message.answer(self._text_storage.REQUEST_FOR_SYMBOL_FOR_SESSION_CHANGE,
+        await message.answer(self._text_storage.REQUEST_FOR_SESSION_CHANGE_PARAMETERS,
                              reply_markup=self._get_session_change_keyboard({}))
 
     # noinspection PyUnusedLocal

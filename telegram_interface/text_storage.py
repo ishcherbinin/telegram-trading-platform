@@ -44,8 +44,6 @@ class BaseTextStorage:
 
     TEXT_NO_PERMISSIONS_FOR_COMMAND = "You are not allowed to use this command"
 
-    REQUEST_FOR_SYMBOL_FOR_SESSION_CHECK = "Please provide symbol for session check"
-
     TEXT_CURRENT_SESSION_ON_INSTRUMENT = "Current session is"
 
     REQUEST_FOR_ORDER_DETAILS_MESSAGE = "Please provide symbol, side, price, quantity"
@@ -68,7 +66,7 @@ class BaseTextStorage:
 
     ORDER_NOT_FOUND = "❌ Order not found."
 
-    REQUEST_FOR_SYMBOL_FOR_SESSION_CHANGE = "🔄 Enter symbol for session change:"
+    REQUEST_FOR_SESSION_CHANGE_PARAMETERS = "🔄 Enter session change parameters:"
 
     HALT_SESSION_ORDER_REJECTION = "❌ Order rejected. Trading session is halted."
 
@@ -85,6 +83,6 @@ class BaseTextStorage:
 
     USER_TRADE_NOTIFICATION = "Trade happened with your order at price {trade_price} and quantity {trade_qty}"
 
-    REQUEST_FOR_SYMBOL_FOR_REFERENCE_PRICE = "🔍 Enter symbol for reference price. Available symbols: {symbols}"
+    COMMON_REQUEST_FOR_SYMBOL_ENTITY = "🔍 Enter symbol for request. Available symbols: {symbols}"
 
     REFERENCE_FOR_SYMBOL_REPLY = "Reference price for {symbol} is {price}"
