@@ -31,13 +31,14 @@ class ReferenceData:
                 continue
             rates = api_data.get("rates", {})
             ref_price = self._get_ref_price_for_currency(rates, source_instrument)
+            _logger.debug(f"Currency pair: {instrument}, reference price: {ref_price}")
             self._instrument_data[instrument] = {"reference_price": ref_price}
 
     # noinspection PyMethodMayBeStatic
     def _get_ref_price_for_currency(self, rates: dict[str, float],
                                     source_instrument: str) -> Decimal:
         rate = rates.get(source_instrument, 0.0)
-        ref_price = Decimal(str(rate))
+        ref_price = Decimal(str(rate)).quantize(Decimal("0.0001"))
         return ref_price
 
     def _get_data_from_api(self, target_instrument: str) -> dict[str, Any]:

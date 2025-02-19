@@ -1,4 +1,6 @@
+import ast
 import logging.config
+import os
 from typing import Any
 
 import pytest
@@ -19,6 +21,11 @@ class AuctionSession(RegularTrading):
     def on_new_entry(self, entry: dict[str, Any]) -> list[Event]:
         return []
 
+@pytest.fixture(scope="session")
+def available_symbols() -> list[str]:
+    av_sym = os.getenv("AVAILABLE_SYMBOLS", "['RUB/USD','GEL/USD']")
+    symbols = ast.literal_eval(av_sym)
+    return symbols
 
 @pytest.fixture(scope="session")
 def order_data() -> dict[str, Any]:
@@ -86,5 +93,7 @@ def entry_processor(session_manager: SessionManager) -> EntryProcessor:
     return EntryProcessor(session_manager)
 
 @pytest.fixture(scope="function")
-def reference_data_class() -> ReferenceData:
-    return ReferenceData()
+def reference_data_class(available_symbols: list[str]) -> ReferenceData:
+    rd = ReferenceData()
+    rd.set_available_symbols(available_symbols)
+    return rd
