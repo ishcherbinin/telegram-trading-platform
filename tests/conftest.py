@@ -1,6 +1,7 @@
 import ast
 import logging.config
 import os
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -26,6 +27,11 @@ def available_symbols() -> list[str]:
     av_sym = os.getenv("AVAILABLE_SYMBOLS", "['RUB/USD','GEL/USD']")
     symbols = ast.literal_eval(av_sym)
     return symbols
+
+@pytest.fixture(scope="session")
+def reference_data_tables_path() -> Path:
+    path = Path(os.getenv("REFERENCE_DATA_TABLES_PATH", "tables"))
+    return path
 
 @pytest.fixture(scope="session")
 def order_data() -> dict[str, Any]:
@@ -93,7 +99,7 @@ def entry_processor(session_manager: SessionManager) -> EntryProcessor:
     return EntryProcessor(session_manager)
 
 @pytest.fixture(scope="function")
-def reference_data_class(available_symbols: list[str]) -> ReferenceData:
-    rd = ReferenceData()
+def reference_data_class(available_symbols: list[str], reference_data_tables_path: Path) -> ReferenceData:
+    rd = ReferenceData(reference_data_tables_path)
     rd.set_available_symbols(available_symbols)
     return rd

@@ -86,3 +86,5 @@ class BaseTextStorage:
     COMMON_REQUEST_FOR_SYMBOL_ENTITY = "🔍 Enter symbol for request. Available symbols: {symbols}"
 
     REFERENCE_FOR_SYMBOL_REPLY = "Reference price for {symbol} is {price}"
+
+    ORDER_REJECTION_BY_VALIDATION_TEXT = "Order rejected by validation: {validation_errors}"

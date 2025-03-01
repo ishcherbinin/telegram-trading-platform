@@ -1,27 +1,46 @@
+import csv
 import logging
 from decimal import Decimal
-from typing import Any
+from pathlib import Path
+from typing import Any, Union
 import requests
 from urllib.parse import urlparse, urljoin
 
 _logger = logging.getLogger(__name__)
 
-class ReferenceData:
 
+class ReferenceData:
     """
     Class defines methods and storage for reference data per symbol/instrument
 
     It might be overridden with another implementation if required but should have same tables and it's fields
     """
 
-
-    def __init__(self):
+    def __init__(self, tables_path: Union[str, Path]):
         self._instrument_data: dict[str, dict[str, Any]] = {}
         self._api_end_point = urlparse("https://open.er-api.com/v6/latest/")
         self._available_symbols: list[str] = []
+        self._tables_path = tables_path
 
     def __repr__(self):
         return f"{self.__class__.__name__}"
+
+    def load_ref_data_tables(self):
+        """
+        Load reference data tables from files located near model
+        :return:
+        """
+        if not self._tables_path.exists():
+            _logger.error(f"Tables path {self._tables_path} does not exist")
+            return
+        instrument_file = self._tables_path / "instruments.csv"
+        with open(instrument_file, "r") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                symbol = row["symbol"]
+                if symbol in self._available_symbols:
+                    self._instrument_data[symbol].update(row)
+
 
     def load_data_api_currency(self):
         for instrument in self._available_symbols:

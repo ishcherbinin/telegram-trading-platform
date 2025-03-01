@@ -42,6 +42,8 @@ Example: AVAILABLE_SYMBOLS="['RUB/USD','GEL/USD']"
 
 REFPRICE_UPDATE_FREQUENCY=60 is the frequency of updating the reference price in seconds
 
+REFERENCE_DATA_TABLES_PATH="./tables/" is the path to the folder where reference data tables are stored
+
 ```
 4. Install requirements and python if it is needed
 ```
