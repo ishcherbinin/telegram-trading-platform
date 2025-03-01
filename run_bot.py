@@ -2,6 +2,7 @@ import ast
 import asyncio
 import logging.config
 import os
+from pathlib import Path
 
 from aiogram import Bot, Dispatcher
 
@@ -43,6 +44,8 @@ async def main() -> None:
 
     available_symbols = os.getenv("AVAILABLE_SYMBOLS", "['RUB/USD','GEL/USD']")
 
+    tables_path = Path(os.getenv("REFERENCE_DATA_TABLES_PATH", "tables"))
+
     symbols = ast.literal_eval(available_symbols)
 
     fetch_price_delay = int(os.getenv("FETCH_PRICE_DELAY", 60))
@@ -54,6 +57,7 @@ async def main() -> None:
     exchange_builder = ExchangeBuilder()
     exchange_builder.build_exchange()
     exchange_builder.reference_data.set_available_symbols(symbols)
+    exchange_builder.reference_data.load_ref_data_tables(tables_path)
 
     ids_storage = TgIdsStorage()
     ids_storage.set_managers_ids(allowed_chat_ids)

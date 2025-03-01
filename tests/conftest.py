@@ -30,7 +30,7 @@ def available_symbols() -> list[str]:
 
 @pytest.fixture(scope="session")
 def reference_data_tables_path() -> Path:
-    path = Path(os.getenv("REFERENCE_DATA_TABLES_PATH", "tables"))
+    path = Path(os.getenv("REFERENCE_DATA_TABLES_PATH", "../tables"))
     return path
 
 @pytest.fixture(scope="session")
@@ -99,7 +99,7 @@ def entry_processor(session_manager: SessionManager) -> EntryProcessor:
     return EntryProcessor(session_manager)
 
 @pytest.fixture(scope="function")
-def reference_data_class(available_symbols: list[str], reference_data_tables_path: Path) -> ReferenceData:
-    rd = ReferenceData(reference_data_tables_path)
+def reference_data_class(available_symbols: list[str]) -> ReferenceData:
+    rd = ReferenceData()
     rd.set_available_symbols(available_symbols)
     return rd
