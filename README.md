@@ -18,7 +18,8 @@ The project is based on the following technologies:
 3. Docker
 
 Text for the messages might be replaced in [text_storage.py](telegram_interface/text_storage.py) to what you need and language you use
-By default all text are in English
+
+By default, all texts are in English
 
 ### 3. Setting
 
