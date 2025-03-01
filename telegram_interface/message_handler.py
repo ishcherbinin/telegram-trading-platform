@@ -306,7 +306,6 @@ class MessageHandler:
         order_data = self._data_converter.convert(assigned_data)
         _logger.debug(f"Order data: {order_data}")
         events = self._entry_processor.process_entry(order_data)
-        await callback.message.answer(self._text_storage.CONFIRMATION_OF_ORDER_CREATION_MESSAGE)
         await state.clear()
         self._ids_storage.add_user_ids(callback.message.chat.username, str(callback.message.chat.id))
         await self._listeners_manager.process_events(events)

@@ -14,6 +14,8 @@ from trading_exchange.reference_data import ReferenceData
 from trading_exchange.session_manager import SessionManager
 from trading_exchange.sessions.regular_trading import RegularTrading
 from trading_exchange.trade_storage import TradeStorage
+from trading_exchange.validations.price_band_validator import PriceBandValidator
+from trading_exchange.validations.validation_manager import ValidationManager
 
 logging.config.dictConfig(log_config)
 
@@ -95,8 +97,13 @@ def session_manager(regular_trading: RegularTrading,
         "OPEN_AUCTION": AuctionSession(orders_storage, trade_storage)})
 
 @pytest.fixture(scope="function")
-def entry_processor(session_manager: SessionManager) -> EntryProcessor:
-    return EntryProcessor(session_manager)
+def validation_manager(reference_data_class: ReferenceData) -> ValidationManager:
+    return ValidationManager(validators=[PriceBandValidator(reference_data_class)])
+
+@pytest.fixture(scope="function")
+def entry_processor(session_manager: SessionManager,
+                    validation_manager: ValidationManager) -> EntryProcessor:
+    return EntryProcessor(session_manager, validation_manager)
 
 @pytest.fixture(scope="function")
 def reference_data_class(available_symbols: list[str]) -> ReferenceData:

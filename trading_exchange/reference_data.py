@@ -74,6 +74,9 @@ class ReferenceData:
     def get_reference_price(self, symbol: str) -> Decimal:
         return self._instrument_data.get(symbol, {}).get("reference_price", Decimal(0.0))
 
+    def get_price_band_percentage(self, symbol: str) -> Decimal:
+        return Decimal(self._instrument_data.get(symbol, {}).get("price_band_percentages", Decimal(0.0)))
+
     # noinspection PyMethodMayBeStatic
     def set_available_symbols(self, symbols: list[str]):
         self._available_symbols = symbols

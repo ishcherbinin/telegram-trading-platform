@@ -9,6 +9,8 @@ from trading_exchange.sessions.abstract_session import AbstractSession
 from trading_exchange.sessions.halt import Halt
 from trading_exchange.sessions.regular_trading import RegularTrading
 from trading_exchange.trade_storage import TradeStorage
+from trading_exchange.validations.price_band_validator import PriceBandValidator
+from trading_exchange.validations.validation_manager import ValidationManager
 
 _logger = logging.getLogger(__name__)
 
@@ -25,6 +27,7 @@ class ExchangeBuilder:
         self.session_manager = None
         self.trade_storage = None
         self.reference_data = None
+        self.validation_manager = None
 
     def build_exchange(self):
 
@@ -34,11 +37,18 @@ class ExchangeBuilder:
         self.trade_storage = self._build_trade_storage()
         sessions = self._build_sessions(self.orders_storage, self.trade_storage)
         self.session_manager = self._build_session_manager(sessions)
-        self.entry_processor = EntryProcessor(self.session_manager)
+        self.validation_manager = self._build_validation_manager()
+        self.entry_processor = EntryProcessor(self.session_manager, self.validation_manager)
 
+
+    def _build_validation_manager(self) -> ValidationManager:
+        validations  = [
+            PriceBandValidator(self.reference_data),
+        ]
+        return ValidationManager(validations)
 
     # noinspection PyMethodMayBeStatic
-    def _build_reference_data(self):
+    def _build_reference_data(self) -> ReferenceData:
         rd = ReferenceData()
         return rd
 

@@ -6,6 +6,7 @@ from event_listeners.abstract_listener import AbstractEventListener
 from telegram_interface.ids_storage import TgIdsStorage
 from telegram_interface.text_storage import BaseTextStorage
 from trading_exchange.event import Event
+from trading_exchange.order import Order
 from trading_exchange.trade import Trade
 
 
@@ -31,6 +32,8 @@ class TgEventListener(AbstractEventListener):
             await self._notify_users_about_trade(trade)
         if event_name == "ORDER_REJECTED":
             await self._notify_users_about_rejected_order(event.info)
+        if event_name == "ORDER_ADDED":
+            await self._notify_users_about_order_added(event.info)
 
     async def _process_trade_event_managers(self, trade: Trade):
         """
@@ -67,4 +70,15 @@ class TgEventListener(AbstractEventListener):
         if chat_id:
             errors = info.get("ValidationErrors", "Unknown error")
             msg = self._text_storage.ORDER_REJECTION_BY_VALIDATION_TEXT.format(validation_errors=errors)
+            await self._bot.send_message(chat_id, msg)
+
+    async def _notify_users_about_order_added(self, info: Order):
+        """
+        Notify user about order being added
+        :param info:
+        :return:
+        """
+        chat_id = self._tg_ids_storage.get_user_ids(info.username)
+        if chat_id:
+            msg = self._text_storage.CONFIRMATION_OF_ORDER_CREATION_MESSAGE
             await self._bot.send_message(chat_id, msg)
