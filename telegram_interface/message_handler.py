@@ -61,6 +61,7 @@ class MessageHandler:
         self._register_cancel_order_handlers()
         self._register_new_order_handlers()
         self._register_get_reference_price_handlers()
+        self._dispatcher.message.register(self._any_messages_handler)
 
     def _register_get_reference_price_handlers(self):
         self._dispatcher.message.register(self._get_reference_price_command, Command("getreferenceprice"))
@@ -94,6 +95,7 @@ class MessageHandler:
         self._dispatcher.message.register(self._my_orders_command, Command("myorders"))
         self._dispatcher.message.register(self._all_orders_command, Command("showallorders"))
         self._dispatcher.message.register(self._exit_command, Command("exit"))
+
 
     def _register_session_change_handlers(self):
         """
@@ -166,6 +168,13 @@ class MessageHandler:
         price = self._reference_data.get_reference_price(symbol)
         await message.answer(self._text_storage.REFERENCE_FOR_SYMBOL_REPLY.format(symbol=symbol, price=price))
         await state.clear()
+
+    async def _any_messages_handler(self, message: types.Message):
+        await message.answer(self._text_storage.ANY_MESSAGE_ENTRY_TEXT)
+        text = (self._text_storage.HELP_CLIENT 
+                if await validate_chat_id(str(message.chat.id), self._allowed_ids) 
+                else self._text_storage.HELP_MANAGERS)
+        await message.answer(text)
 
     async def _change_session_command(self, message: types.Message, state: FSMContext):
         if await validate_chat_id(str(message.chat.id), self._allowed_ids):
