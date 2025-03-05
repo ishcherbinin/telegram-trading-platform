@@ -169,3 +169,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+# custom part for this project
+# allure report
+allure_results/*
+bandit*
