@@ -32,7 +32,7 @@ def available_symbols() -> list[str]:
 
 @pytest.fixture(scope="session")
 def reference_data_tables_path() -> Path:
-    path = Path(os.getenv("REFERENCE_DATA_TABLES_PATH", "../tables"))
+    path = Path(__file__).parent / Path("./test_tables")
     return path
 
 @pytest.fixture(scope="session")
